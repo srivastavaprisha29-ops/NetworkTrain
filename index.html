@@ -3,17 +3,45 @@
 <head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="description" content="Follow a packet through the OSI model and experiment with network-layer protocols."><title>NetworkTrain — Packet Lab</title>
 <style>
 :root{color-scheme:dark;--bg:#080c15;--panel:#101826;--line:#26354b;--ink:#f1f6ff;--muted:#a0b1c9;--blue:#59a9ff;--cyan:#65e1ed}*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--ink);font:15px/1.5 system-ui,sans-serif}button,select,input{font:inherit}button,select{color:inherit;background:#151f31;border:1px solid var(--line);border-radius:8px;padding:8px 12px;cursor:pointer}button:hover,select:hover{border-color:var(--blue)}button:focus-visible,select:focus-visible,input:focus-visible{outline:2px solid var(--cyan);outline-offset:3px}button:disabled{opacity:.42;cursor:default}button[aria-pressed=true],.primary{background:#17478a;border-color:#438efd}header{display:flex;gap:28px;align-items:center;padding:16px 24px;border-bottom:1px solid var(--line);background:#0d1421;flex-wrap:wrap}.brand{font-size:21px;font-weight:800;letter-spacing:-.6px;white-space:nowrap}.brand b{color:var(--blue);margin-right:10px}.toolbar,.controls,.branches,.pills{display:flex;align-items:center;gap:8px;flex-wrap:wrap}.toolbar button{padding:7px 10px}.layout{display:grid;grid-template-columns:204px minmax(0,1fr) 312px;max-width:1700px;margin:auto;min-height:85vh}aside{padding:24px 16px;border-right:1px solid var(--line)}aside.inspector{border-right:0;border-left:1px solid var(--line)}main{padding:26px;min-width:0}h1,h2,h3,p{margin:0}h1{font-size:clamp(24px,3vw,38px);line-height:1.16;letter-spacing:-1px}h2{font-size:18px}h3{font-size:15px}small,.muted{color:var(--muted)}.label{font:700 11px/1.5 ui-monospace,monospace;letter-spacing:.12em;text-transform:uppercase;color:var(--blue)}.layers{display:grid;gap:7px;margin:12px 0 18px}.layer{display:flex;text-align:left;align-items:center;gap:9px}.layer span{font:12px ui-monospace;color:var(--blue)}.layer[aria-pressed=true]{box-shadow:inset 3px 0 var(--cyan)}.directions{display:grid;gap:7px}.intro{margin:7px 0 18px}.stage{border:1px solid var(--line);border-radius:14px;overflow:hidden;background:#0d1626}.stage-heading{padding:15px 17px;border-bottom:1px solid var(--line);display:flex;justify-content:space-between;gap:12px;align-items:center}.live{color:var(--cyan);white-space:nowrap}.stage canvas{display:block;width:100%;height:300px;background:radial-gradient(ellipse at 50% 55%,#142949,#0b1424 75%)}.controls{padding:12px;border-top:1px solid var(--line)}.controls input{flex:1;min-width:95px;accent-color:var(--blue)}.branches{margin:12px 0}.branches .label{width:100%}.cards{display:grid;grid-template-columns:repeat(auto-fit,minmax(155px,1fr));gap:9px;margin-top:14px}.card,details{background:var(--panel);border:1px solid var(--line);border-radius:9px;padding:11px}.card p{color:var(--muted);margin-top:3px;font-size:13px}.inspector h2{margin:7px 0 8px}.inspector p{font-size:14px;color:var(--muted)}.stack{display:flex;flex-wrap:wrap;gap:5px;margin:16px 0}.stack span{background:#15355e;border:1px solid #30578c;padding:5px 7px;border-radius:5px;font:12px ui-monospace;color:#dbeaff}.fields{margin:14px 0 20px}.field{padding:8px 0;border-bottom:1px solid var(--line);display:grid;gap:2px}.field span{font-size:12px;color:var(--muted)}.field strong{font:13px ui-monospace;overflow-wrap:anywhere}.notes{margin-top:16px}.notes details{margin-top:7px}.notes summary{cursor:pointer;color:#cee4ff}.notes p{color:var(--muted);margin-top:8px}dialog{max-width:620px;width:calc(100% - 28px);background:#101826;color:var(--ink);border:1px solid var(--line);border-radius:12px;padding:22px}dialog::backdrop{background:#04070ccc}.dialog-top{display:flex;justify-content:space-between;align-items:center;gap:12px;margin-bottom:12px}.source-list li{margin:7px 0}.tools-end{margin-left:auto}@media(max-width:1050px){.layout{grid-template-columns:166px minmax(0,1fr)}aside.inspector{grid-column:2;border-left:0;border-top:1px solid var(--line);padding:20px 26px}main{padding:20px}.stage canvas{height:280px}}@media(max-width:650px){header{padding:12px;gap:9px}.layout{display:block}aside,main,aside.inspector{padding:12px}.layout>aside:first-child{border-bottom:1px solid var(--line);border-right:0}.layers{display:flex;overflow:auto;margin:7px 0}.layer{white-space:nowrap}.directions{display:flex;flex-wrap:wrap}.stage canvas{height:250px}.stage-heading{align-items:flex-start}.tools-end{margin-left:0}}
+</style>
+<style>
+:root{--bg:#030509;--panel:#080e19;--line:#203247;--ink:#e3edf9;--muted:#94a9c0;--blue:#68aaff;--cyan:#77d6ff;--top:64px}
+body{overflow-anchor:none;font-family:ui-monospace,SFMono-Regular,Consolas,"Liberation Mono",monospace;overscroll-behavior:none}
+header{position:fixed;inset:0 0 auto;z-index:5;min-height:64px;padding:10px 22px;background:#050a13f7;gap:17px;flex-wrap:nowrap}
+.brand{font-weight:700;font-size:17px;letter-spacing:-.06em}.brand b{font-size:18px}
+.toolbar{flex:1;min-width:0;flex-wrap:nowrap;overflow-x:auto;scrollbar-width:thin}
+button,select{border-radius:3px;background:#0b1422;padding:7px 9px;font-size:12px}
+.tools-end{white-space:nowrap}
+#concept-pop{position:fixed;top:calc(var(--top) + 8px);left:min(16vw,210px);z-index:8;width:min(430px,calc(100vw - 30px));padding:14px;background:#0a1423;border:1px solid #376193;box-shadow:0 10px 40px #000b}
+#concept-pop p{font-size:12px;color:var(--muted);margin-top:6px}
+#concept-pop[hidden]{display:none}
+.layout{position:fixed;top:var(--top);left:0;right:0;height:calc(100svh - var(--top));min-height:0;display:grid;grid-template-columns:142px minmax(0,1fr);max-width:none;background:#030509}
+.layout>aside:first-child{z-index:2;background:#070c16;border-color:#162336;padding:18px 10px}
+.layer{gap:6px;width:100%;font-size:11px;padding:9px 6px}.layer[aria-pressed=true]{background:#0d233e}.layer span{font-size:10px}
+main{position:relative;padding:0;overflow:hidden;height:100%}
+.stage{position:absolute;inset:0;border:0;border-radius:0;background:#030509;overflow:hidden}
+.stage canvas{width:100%;height:100%;background:#030509;touch-action:none;cursor:grab}.stage canvas:active{cursor:grabbing}
+.stage-heading{position:absolute;z-index:2;top:88px;left:22px;right:22px;padding:0;border:0;pointer-events:none}.stage-heading h2{font-size:14px;color:#a9cfff}.stage-heading small{letter-spacing:.08em}
+.overlay{position:absolute;z-index:2;pointer-events:none;top:14px;left:22px;right:22px}.overlay>*{pointer-events:auto;width:max-content;max-width:100%}
+.overlay h1{font-family:inherit;font-size:clamp(22px,3vw,34px);letter-spacing:-.07em;margin:2px 0 0}.overlay .intro{display:none}.overlay .branches{margin-top:4px;gap:5px}.branches .label{display:none}
+.controls{position:absolute;bottom:9px;left:20px;right:20px;z-index:3;background:#08111dec;border:1px solid var(--line);padding:6px 9px;border-radius:4px}.controls input{min-width:30px}.controls small{font-size:11px}
+.cards{position:absolute;z-index:2;bottom:55px;left:20px;right:300px;display:flex;gap:6px;flex-wrap:wrap;pointer-events:none}.card{max-width:260px;border-radius:3px;background:#08111ded;padding:7px 9px}.card h3{font-size:11px;color:#a8ccff}.card p{font-size:11px}
+aside.inspector{position:absolute;bottom:56px;right:20px;z-index:3;width:260px;max-height:36%;overflow:auto;background:#08111df5;border:1px solid var(--line);border-radius:4px;padding:10px;overscroll-behavior:contain}.inspector h2{font-size:13px}.inspector p{font-size:11px}.stack{margin:8px 0 3px}.stack span{font-size:10px;padding:2px 4px}.fields{margin:4px 0}.field{display:flex;justify-content:space-between;gap:8px;padding:4px 0}.field span,.field strong{font-size:10px}.field strong{text-align:right}
+#rail{padding-top:var(--top)}#map-stages{display:grid;gap:5px;margin-top:14px}#map-stages button{text-align:left}#map-stages span{display:block;color:var(--muted);margin-top:2px}
+dialog{border-radius:4px}a{color:#85baff}#notes details{margin-top:6px}#notes summary{cursor:pointer}
+@media(max-width:760px){header{padding:7px 9px;gap:8px}.brand{font-size:13px}.brand b{margin-right:4px}.tools-end{display:none}.layout{grid-template-columns:1fr;grid-template-rows:auto minmax(0,1fr)}.layout>aside:first-child{padding:4px 7px;border-right:0;border-bottom:1px solid var(--line)}.layout>aside:first-child>.label{display:none}.layers{margin:0 0 4px;gap:4px}.layer{width:auto;padding:4px 6px}.directions{display:flex;gap:4px}.directions button{padding:3px 6px}.overlay,.stage-heading{left:9px;right:9px}.stage-heading{top:83px}.stage-heading h2{font-size:11px}.cards{display:none}.controls{left:8px;right:8px}.controls small{display:none}aside.inspector{right:8px;bottom:49px;width:min(270px,75vw);max-height:27%;padding:6px}.inspector h2{margin:2px 0}.overlay .branches button{padding:3px 5px;font-size:10px}#concept-pop{left:10px}}
 </style></head>
 <body>
-<header><div class="brand"><b>⇄</b>NetworkTrain</div><nav class="toolbar" aria-label="Packet labs" id="toolbar"></nav><button class="tools-end" id="sources">Slide coverage</button></header>
-<div class="layout">
+<header><div class="brand"><b>⇄</b>NetworkTrain</div><nav class="toolbar" aria-label="Concepts at this point" id="toolbar"></nav><button class="tools-end" id="sources">Slide coverage</button></header>
+<div id="concept-pop" hidden></div><div id="rail"><div class="layout">
 <aside><div class="label">OSI model</div><nav class="layers" aria-label="OSI layers" id="layers"></nav><div class="directions"><button id="down">↓ Sender stack</button><button id="up">↑ Receiver stack</button></div></aside>
-<main><div class="label" id="section"></div><h1 id="title"></h1><p class="intro muted" id="intro"></p><div class="branches" id="branches"></div>
+<main><div class="overlay"><div class="label" id="section"></div><h1 id="title"></h1><p class="intro muted" id="intro"></p><div class="branches" id="branches"></div></div>
 <section class="stage" aria-label="Packet simulator"><div class="stage-heading"><h2 id="step-title"></h2><small class="live" id="counter"></small></div><canvas id="canvas" role="img" aria-label="Network topology and active packet paths"></canvas>
-<div class="controls"><button id="reset" title="Reset playback">↺</button><button id="prev" aria-label="Previous step">‹</button><button class="primary" id="play">▶ Play</button><button id="next" aria-label="Next step">›</button><input id="scrub" type="range" min="0" value="0" aria-label="Step timeline"><select id="speed" aria-label="Playback speed"><option value=".5">0.5×</option><option value="1" selected>1×</option><option value="2">2×</option></select></div></section>
-<div class="cards" id="operations"></div><section class="notes" id="notes"></section></main>
+<div class="controls"><button id="reset" title="Return to source">Reset</button><small>Drag the packet or scroll to travel</small><input id="scrub" type="range" min="0" value="0" aria-label="Packet position"><button id="router-map">Router map</button><button id="lab-menu">Labs &amp; notes</button></div></section>
+<div class="cards" id="operations"></div></main>
 <aside class="inspector" aria-label="Packet inspector"><div class="label">Packet inspector</div><h2 id="inspect-title"></h2><p id="inspect-description"></p><div class="stack" id="stack"></div><div class="fields" id="fields"></div></aside>
-</div>
+</div></div>
+<dialog id="map-dialog"><div class="dialog-top"><h2>R1 · Router map</h2><form method="dialog"><button>Close</button></form></div><p class="muted">Follow the datagram from the incoming interface to the outgoing interface. Select a stage to jump there.</p><div id="map-stages"></div></dialog><dialog id="lab-dialog"><div class="dialog-top"><h2>Packet labs</h2><form method="dialog"><button>Close</button></form></div><div class="branches" id="lab-list"></div><section class="notes" id="notes"></section></dialog>
 <dialog id="source-dialog"><div class="dialog-top"><h2>Slide coverage</h2><form method="dialog"><button>Close</button></form></div><ul class="source-list" id="source-list"></ul></dialog>
 <script>
 'use strict';
@@ -32,13 +60,6 @@ const packet=['Ethernet','IPv4','Transport','Data','FCS'];
 const hopFields=(ttl,src,dst)=>[['Source IP','192.0.2.10'],['Destination IP','203.0.113.20'],['TTL',ttl],['Source MAC',src],['Destination MAC',dst]];
 const step=(title,description,paths=[],operations=[],fields=[],stack=packet)=>({title,description,paths,operations,fields,stack});
 const send=(from,to,label='IPv4',color='#59a9ff',delay=0)=>({from,to,label,color,delay});
-const tx=[
- step('Host A determines the next hop','Mask the destination and compare it with the local subnet. Host B is remote, so Host A selects its gateway R1.',[],[['Delivery','Indirect delivery to a gateway.'],['Encapsulation','IPv4 stores Host B as its destination.']],[['Destination','203.0.113.20'],['Local subnet','192.0.2.0/24'],['Next-hop IP','192.0.2.1']],['IPv4','Transport','Data']),
- step('Host A sends to R1','Host A puts the gateway MAC in the Ethernet header and puts Host B’s IP in the IPv4 header.',[send('A','R1')],[['Link transmission','Host A serializes the frame onto the first link.'],['Signal propagation','The first bits travel while later bits enter the link.']],hopFields(64,'Host A','R1 ingress')),
- step('R1 forwards to R2','R1 removes the incoming frame, selects an outgoing interface using the destination prefix, decrements TTL, and builds a new frame.',[send('R1','R2')],[['Forwarding lookup','Best match selects R2 at 198.51.100.2.'],['IPv4 header','TTL changes from 64 to 63. The header checksum is updated.'],['New Ethernet frame','Source and destination MACs belong to this link.']],hopFields(63,'R1 egress','R2 ingress')),
- step('R2 delivers directly to Host B','The destination network is directly connected to R2. It uses Host B’s IP for ARP, then emits a frame addressed to Host B.',[send('R2','B')],[['Next-hop IP','203.0.113.20, the final host.'],['IPv4 header','TTL changes from 63 to 62.']],hopFields(62,'R2 egress','Host B')),
- step('Host B passes the payload upward','The Ethernet frame is removed, IP recognizes its local destination, and the payload goes to transport.',[],[['Link layer','Checks and removes Ethernet framing.'],['Network layer','Uses IPv4 Protocol to hand the payload upward.']],[['Destination IP','203.0.113.20'],['TTL on arrival','62']],['Transport','Data'])
-];
 const direct=[
  step('Compare the destination with the local subnet','Host A and Host B are on 192.0.2.0/24. Host A resolves Host B’s MAC from Host B’s IP.',[],[['Next-hop IP','192.0.2.20']],[['Destination IP','192.0.2.20'],['Network prefix','192.0.2.0/24']],['IPv4','Transport','Data']),
  step('Send directly across the LAN','The IPv4 and Ethernet destination both identify Host B. There is no IP router on this path.',[send('A','B')],[['Direct delivery','A switch may forward the frame within the LAN.']],[['Source IP','192.0.2.10'],['Destination IP','192.0.2.20'],['Destination MAC','Host B'],['TTL','64']])
@@ -47,7 +68,7 @@ const modes={};
 function lab(id,name,subtitle,options,notes){modes[id]={name,subtitle,options,notes};}
 const option=(label,steps,visible=['A','R1','R2','B'],links=[['A','R1'],['R1','R2'],['R2','B']],aliases={})=>({label,steps,visible,links,aliases});
 lab('journey','Packet journey','Follow an IPv4 datagram from sender to receiver and inspect the headers at each hop.',[
- option('Indirect delivery',tx),option('Direct delivery',direct,['A','B'],[['A','B']],{B:'192.0.2.20'})
+ option('Direct delivery',direct,['A','B'],[['A','B']],{B:'192.0.2.20'})
 ],[
  ['Why IP and MAC differ','IP identifies the endpoints of this datagram. Ethernet MAC addresses identify the local sender and next hop and are rebuilt at each router.'],
  ['Source, router and destination','The source creates the datagram. Each router forwards it toward the destination. The receiving host removes the IP header and delivers the payload upward.']
@@ -150,159 +171,325 @@ function make(tag,text,cls){
  return el;
 }
 function button(text,action,selected,cls){
- const el=make('button',text,cls);
- el.onclick=action;
+ const el=make('button',text,cls);el.onclick=action;
  if(selected!==undefined)el.setAttribute('aria-pressed',selected);
  return el;
 }
-const tabs=[['journey','Journey'],['encap','Encapsulation'],['unicast','Unicast'],['multi','Multicasting'],['broadcast','Broadcasting'],['arp','ARP'],['forward','Forwarding'],['switch','Switching'],['route','Routing']];
-const sources=[
- 'Network Layer 1 · Switching, delay examples, and network-layer services.',
- 'Network Layer 3 · Delivery and Forwarding (PPTX): direct and indirect delivery, forwarding tables, CIDR, aggregation and ISP hierarchy.',
- 'Network Layer 3 · Delivery and Forwarding (legacy PPT): related classful and classless forwarding material.',
- 'Network Layer 5 · Routing Protocols: distance vector, RIP, link state, OSPF, path vector and BGP.',
- 'Network Layer 5 · Routing Protocols (second copy): matching OSPF packet/LSA sequence, including the Router and Network LSA examples.',
- 'Network Layer 6 · ARP: local versus remote next-hop resolution and request/reply behavior.'
+const tabs=[['journey','Packet journey'],['encap','OSI encapsulation'],['unicast','Unicast'],['multi','Multicast'],['broadcast','Broadcast'],['arp','ARP'],['forward','Forwarding'],['switch','Switching'],['route','Routing protocols']];
+const rnodes={
+ A:[0,0,'Host A','192.0.2.10'],I:[580,0,'Ingress','Ethernet / PHY'],V:[790,0,'Validate IPv4','Length · version · checksum'],
+ F:[1025,0,'Next-hop lookup','Destination → prefix → interface'],H:[1250,0,'Update IPv4','TTL · header checksum'],
+ N:[1475,0,'Resolve next-hop MAC','ARP cache / request / reply'],M:[1725,0,'MTU decision','Outgoing link MTU'],
+ O:[1975,0,'Egress','Queue · Ethernet · PHY'],R2:[2510,0,'Router R2','Next hop · 198.51.100.2'],B:[3040,0,'Host B','203.0.113.20'],
+ Drop:[790,135,'Discard','Failed IPv4 validation'],Frag:[1830,135,'Fragment','IPv4 · DF = 0'],ICMP:[1715,-125,'ICMP error','Fragmentation needed']
+};
+const detailFields=[
+ ['IP source','192.0.2.10'],['IP destination','203.0.113.20']
 ];
-sources.forEach(s=>$('source-list').append(make('li',s)));
+const detailStep=(title,desc,from,to,ops,fields=[],stack=packet,label='IPv4')=>step(title,desc,[send(from,to,label)],ops,[...detailFields,...fields],stack);
+function routerJourney(variant){
+ const size=variant===1||variant===2?'1,500':'1,000';
+ const ttl=variant===4?'1':'64';
+ const datagram=['IPv4 header','Transport','Data'];
+ const stages=[
+  detailStep('Leave the sender','Host A compares the target with its /24 subnet, resolves the gateway, then sends an Ethernet frame addressed to R1.','A','I',[['Encapsulation','Ethernet wraps the IPv4 datagram.'],['On the wire','Earlier bits propagate while later bits enter the link.']],[['Next-hop IP','192.0.2.1'],['Destination MAC','R1 ingress'],['TTL',ttl],['IPv4 length',size+' B']]),
+  detailStep('Receive and validate','The ingress interface receives the frame. Ethernet checks the FCS and delivers the IPv4 datagram for validation.','I','V',[['Data link','Check FCS and strip the incoming Ethernet framing.'],['IPv4 validation','Check version, header length, total length, and checksum.']],[['Input port','R1 ingress'],['Header checksum',variant===3?'Invalid':'Valid']],datagram)
+ ];
+ if(variant===3)return [...stages,detailStep('Discard invalid datagram','The corrupt IPv4 header fails validation and the router discards the datagram.','V','Drop',[['Disposition','Discard before forwarding lookup.']], [['Reason','Invalid IPv4 header checksum']],datagram,'DROP')];
+ stages.push(
+  detailStep('Find the next-hop IP','The forwarding plane matches the destination IP to the most specific route. That route supplies the outgoing interface and the next-hop IP.','V','F',[['Routing table','203.0.113.0/24 → R2 via eth1'],['Control plane','Routing protocols can update the table independently of this packet.']],[['Matching prefix','203.0.113.0/24'],['Next-hop IP','198.51.100.2'],['Outgoing interface','eth1']],datagram),
+  detailStep('Update TTL and checksum','R1 reduces the IPv4 TTL and updates the IPv4 header checksum.','F','H',[['Forwarding header','The endpoint IPs are retained.'],['TTL check','A packet with expired TTL is discarded.']],[['TTL',variant===4?'1 → 0':'64 → 63'],['IPv4 checksum','Updated after TTL changes']],datagram)
+ );
+ if(variant===4)return [...stages,detailStep('Return ICMP Time Exceeded','R1 discards the expired packet and sends an ICMP Time Exceeded response toward Host A.','H','A',[['Original packet','Discarded at R1.'],['New control message','ICMP Type 11, Code 0.']],[['Original TTL','0'],['ICMP destination','192.0.2.10']],['IPv4','ICMP','Quoted packet'],'ICMP')];
+ stages.push(
+  detailStep('Resolve the next-hop MAC','On eth1, R1 uses the next-hop IP as its ARP lookup key. This route already has a usable cached mapping.','H','N',[['ARP cache','198.51.100.2 → R2 ingress MAC.'],['Cache miss alternative','Broadcast a request and wait for a unicast reply.']],[['ARP target IP','198.51.100.2'],['New destination MAC','R2 ingress']],datagram),
+  detailStep('Compare packet size with the MTU','The outgoing link has a 1,280-byte MTU. Choose an outcome to see what happens when the packet fits or exceeds it.','N','M',[['MTU table','eth1 → 1,280 bytes'],['IPv4 flags',variant===2?'DF = 1 · fragmentation prohibited':'DF = 0 · fragmentation permitted']],[['Datagram length',size+' bytes'],['Outgoing MTU','1,280 bytes']],datagram)
+ );
+ if(variant===2)return [...stages,detailStep('Return ICMP Fragmentation Needed','The datagram exceeds the link MTU and DF is set. R1 drops it and sends a new ICMP message toward Host A.','M','ICMP',[['Original packet','Cannot use this outgoing link.'],['ICMP Type 3 · Code 4','Report the next-hop MTU to the sender.']],[['Next-hop MTU','1280'],['ICMP destination','192.0.2.10']],['IPv4','ICMP','Quoted packet'],'ICMP'),detailStep('ICMP travels to the sender','Host A learns that it needs a smaller IP datagram for this path.','ICMP','A',[],[['Next-hop MTU','1280']],['IPv4','ICMP'],'ICMP')];
+ if(variant===1)stages.push(detailStep('Split the datagram into fragments','With a 20-byte IPv4 header, floor((1280−20)/8)×8 = 1256 payload bytes fit in the first fragment. The remaining 224 bytes form the second fragment.','M','Frag',[['Fragment 1','1276 bytes total · offset 0 · MF 1'],['Fragment 2','244 bytes total · offset 157 · MF 0']],[['Identification','Same in both headers'],['Offset units','8 bytes']],['IPv4 header','Fragment payload'],'FRAG'));
+ stages.push(
+  detailStep('Queue and build the outgoing frame','The router sends traffic through the selected output interface. Ethernet adds new per-link source and destination addresses.',''+(variant===1?'Frag':'M'),'O',[['Output queue','Wait if the interface is busy.'],['New frame','Source MAC = R1 eth1. Destination MAC = R2 ingress.']],[['TTL','63'],['Outgoing interface','eth1']]),
+  detailStep('Cross the transit network','The frame leaves R1 and travels to R2. End-to-end IP addresses are carried inside the new Ethernet frame.','O','R2',[['Link transmission','The sender serializes the frame.'],['Signal propagation','Bits travel across the transit link.']],[['Source MAC','R1 eth1'],['Destination MAC','R2 ingress'],['TTL','63']]),
+  detailStep('Deliver to Host B',variant===1?'R2 forwards the fragments to the directly connected subnet. Host B reassembles them before handing the payload to transport.':'R2 forwards directly to Host B. Host B receives the frame, removes the headers, and passes the payload upward.','R2','B',[['Direct delivery','R2 resolves Host B’s MAC using Host B’s IP.'],['Receiver',variant===1?'Reassemble using Identification, offsets and MF.':'Deliver the IP payload to the indicated transport protocol.']],[['Destination MAC','Host B'],['TTL','62']])
+ );
+ if(variant===1)for(const st of stages.slice(-3)){const path=st.paths[0];path.label='Frag 1';st.paths.push(send(path.from,path.to,'Frag 2','#75aecb',.21));}
+ return stages;
+}
+const mainBranches=['Fits MTU','Fragment · DF 0','Drop · DF 1','Invalid header','Expired TTL'];
+modes.journey.options=[
+ ...mainBranches.map((label,i)=>option(label,routerJourney(i))),
+ option('Same subnet',direct,['A','B'],[['A','B']],{B:'192.0.2.20'})
+];
+modes.journey.subtitle='Drag the packet to follow the forwarding path.';
+const refs=[
+ ['Switching PPT · slide 34','Router forwarding diagram: validation, routing table, ARP, MTU and ingress/egress data link layers.'],
+ ['Delivery and Forwarding PPTX and PPT','Next-hop selection, CIDR, prefix aggregation and delivery.'],
+ ['Routing Protocols PPTs · both copies','RIP, OSPF and BGP packet exchanges.'],
+ ['ARP PPT','Next-hop IPv4 resolution on the outgoing local link.'],
+ ['RFC 1812','https://www.rfc-editor.org/rfc/rfc1812'],
+ ['Kurose and Ross · router architecture','https://faculty.kfupm.edu.sa/COE/ashraf/RichFilesTeaching/COE072_540/Kurose_ch4_3ed.pdf']
+];
+refs.forEach(([name,detail])=>{
+ const item=make('li');
+ if(detail.startsWith('https:')){const a=make('a',name);a.href=detail;a.target='_blank';a.rel='noopener noreferrer';item.append(a);}
+ else item.textContent=name+' — '+detail;
+ $('source-list').append(item);
+});
 $('sources').onclick=()=>$('source-dialog').showModal();
-let mode='journey',branch=0,index=0,layer=2,playing=false,progress=0,last=0;
+$('lab-menu').onclick=()=>$('lab-dialog').showModal();
+let mode='journey',branch=0,index=0,layer=2,position=0,drag=null,hovered='';
+const span=310;
 const current=()=>modes[mode].options[branch];
 const currentStep=()=>current().steps[index];
-function choose(id,choice=0,position=0){
- mode=id;branch=choice;layer=2;seek(position);renderNavigation();
+const limit=()=>current().steps.length-.001;
+const canvas=$('canvas'),ctx=canvas.getContext('2d');
+const conceptInfo={
+ Encapsulation:['A layer wraps the payload with its own header. At this hop, Ethernet carries the IP datagram and adds the local MAC addresses.','encap'],
+ Decapsulation:['A receiving layer removes its wrapper and passes the payload to the next layer.','encap'],
+ 'IPv4 validation':['R1 checks the IP header before using it. A malformed or corrupt datagram takes the discard branch.','journey'],
+ 'Forwarding lookup':['The destination IP matches a route prefix in the forwarding table. The longest matching prefix selects the next hop and egress interface.','forward'],
+ 'TTL & checksum':['R1 consumes one hop of TTL and updates the IPv4 header checksum. An expired TTL triggers an ICMP Time Exceeded response in this example.','journey'],
+ ARP:['ARP resolves the IP of the local next hop to an Ethernet MAC. A cache miss sends an Ethernet broadcast, and the owner replies.','arp'],
+ 'MTU & fragmentation':['The IP datagram must fit the outgoing link MTU. A larger IPv4 datagram can fragment when DF is clear. With DF set, the router discards it and reports the next-hop MTU.','journey'],
+ 'Queue & transmit':['The frame waits if the output interface is busy, then the interface serializes its bits onto the link.','switch'],
+ 'IP delivery':['The receiver recognizes its IP address. It reassembles fragments when present and hands the payload to transport.','encap'],
+ Unicast:['One destination address identifies a single receiver. This frame is sent to the selected next hop.','unicast'],
+ Multicast:['A group address identifies interested receivers. In the RIP v2 example the destination is 224.0.0.9.','multi'],
+ Broadcast:['All devices on the local link receive the frame. An ARP request uses the Ethernet broadcast address.','broadcast'],
+ 'Control plane':['Routers exchange routing information to populate the table that the data plane uses to forward packets.','route'],
+ 'Packet forwarding':['Forwarding moves packets from the incoming interface toward the selected outgoing interface.','forward']
+};
+function concepts(){
+ if(mode==='encap')return [branch?'Decapsulation':'Encapsulation','IP delivery'];
+ const list={unicast:['Unicast'],multi:['Multicast'],broadcast:['Broadcast'],arp:['ARP','Broadcast','Unicast'],forward:['Forwarding lookup','ARP'],switch:['Packet forwarding','Queue & transmit'],route:['Control plane','Forwarding lookup']};
+ if(mode!=='journey')return list[mode];
+ const p=currentStep().paths[0],stage=p?.to;
+ const local={I:['Encapsulation','ARP'],V:['Decapsulation','IPv4 validation'],F:['Forwarding lookup','Control plane'],H:['TTL & checksum'],N:['ARP','Unicast'],M:['MTU & fragmentation'],Frag:['MTU & fragmentation'],ICMP:['MTU & fragmentation'],O:['Encapsulation','Queue & transmit'],R2:['Unicast','Queue & transmit'],B:['IP delivery','Decapsulation'],Drop:['IPv4 validation'],A:[branch===2?'MTU & fragmentation':'TTL & checksum']};
+ return local[stage]||['Encapsulation','ARP','Unicast'];
 }
-function seek(position){
- index=Math.max(0,Math.min(position,current().steps.length-1));
- progress=0;
- playing=false;
- render();
+function showConcept(name){
+ const item=conceptInfo[name], pop=$('concept-pop');
+ hovered=name;
+ pop.replaceChildren(make('h3',name),make('p',item[0]));
+ pop.append(button('Close',()=>{pop.hidden=true;hovered='';}));
+ pop.hidden=false;
 }
-function move(delta){
- seek(index+delta);
+function nav(){
+ const labels=concepts();
+ if(!$('toolbar').dataset.key||$('toolbar').dataset.key!==labels.join('|')){
+  $('toolbar').dataset.key=labels.join('|');
+  $('toolbar').replaceChildren(...labels.map(name=>{
+   const el=button(name,()=>showConcept(name));
+   el.onpointerenter=()=>showConcept(name);el.onfocus=()=>showConcept(name);
+   return el;
+  }));
+  if(hovered&&!labels.includes(hovered)){$('concept-pop').hidden=true;hovered='';}
+ }
+ const key=String(layer);
+ if($('layers').dataset.key!==key){
+  $('layers').dataset.key=key;
+  $('layers').replaceChildren(...layerNames.map((name,n)=>{
+   const el=button(undefined,()=>{
+    if(n===2){choose('journey');return;}
+    const side=mode==='encap'?branch:0;
+    choose('encap',side,side?n:6-n);
+   },layer===n,'layer');
+   el.append(make('span','L'+(n+1)),document.createTextNode(name));return el;
+  }).reverse());
+ }
 }
-function connectStack(direction){
- choose('encap',direction,direction?layer:6-layer);
-}
-function renderNavigation(){
- $('toolbar').replaceChildren(...tabs.map(([id,label])=>button(label,()=>choose(id),id===mode)));
- $('layers').replaceChildren(...layerNames.map((name,n)=>{
-  const el=button(undefined,()=>{
-   if(n===2 && mode!=='encap'){choose('journey');return;}
-   const side=mode==='encap'?branch:0;
-   choose('encap',side,side?n:6-n);
-  },layer===n,'layer');
-  el.append(make('span','L'+(n+1)),document.createTextNode(name));
-  return el;
- }).reverse());
+function branchControls(){
+ const opts=current().steps;
+ $('branches').replaceChildren();
+ if(mode==='journey'&&branch<5){
+  if(index<4&&branch===0){
+   $('branches').append(button('Same subnet',()=>choose('journey',5)),button('Invalid header',()=>choose('journey',3,1)),button('Expired TTL',()=>choose('journey',4,3)));
+  }else{
+   mainBranches.forEach((label,n)=>$('branches').append(button(label,()=>choose('journey',n,Math.min(index,n===3?2:n===4?4:5)),n===branch)));
+  }
+ }else if(mode==='journey')$('branches').append(button('Routed delivery',()=>choose('journey')));
+ else if(modes[mode].options.length>1)$('branches').append(...modes[mode].options.map((o,n)=>button(o.label,()=>choose(mode,n),n===branch)));
+ return opts;
 }
 function render(){
  if(mode==='encap')layer=branch?index:6-index;
- const selected=modes[mode], st=currentStep(), steps=current().steps;
- $('section').textContent=mode==='encap'?'OSI · Layer '+(layer+1):'Layer 3 · Network';
+ const selected=modes[mode],st=currentStep(),steps=branchControls();
+ $('section').textContent=mode==='encap'?'OSI / L'+(layer+1):'OSI / L3 / NETWORK';
  $('title').textContent=selected.name;
  $('intro').textContent=selected.subtitle;
- $('branches').replaceChildren();
- if(selected.options.length>1){
-  $('branches').append(make('span','Choose a path','label'),...selected.options.map((item,n)=>button(item.label,()=>choose(mode,n),n===branch)));
- }
  $('step-title').textContent=st.title;
- $('counter').textContent=(index+1)+' / '+steps.length;
- $('canvas').setAttribute('aria-label',st.paths.length?st.paths.map(p=>p.label+' from '+nodes[p.from][2]+' to '+nodes[p.to][2]).join('. '):st.description);
- $('scrub').max=steps.length-1;$('scrub').value=index;$('scrub').disabled=steps.length<2;
- $('prev').disabled=index===0;$('next').disabled=index===steps.length-1;
- $('play').textContent=playing?'Ⅱ Pause':'▶ Play';
- $('inspect-title').textContent=st.title;
- $('inspect-description').textContent=st.description;
+ $('counter').textContent=String(index+1).padStart(2,'0')+' / '+String(steps.length).padStart(2,'0');
+ $('canvas').setAttribute('aria-label',st.description);
+ $('inspect-title').textContent=st.title;$('inspect-description').textContent=st.description;
  $('stack').replaceChildren(...st.stack.map(s=>make('span',s)));
- $('fields').replaceChildren(...st.fields.map(([key,value])=>{
-  const row=make('div',undefined,'field');row.append(make('span',key),make('strong',value));return row;
- }));
- $('operations').replaceChildren(...st.operations.map(([title,detail])=>{
-  const card=make('article',undefined,'card');card.append(make('h3',title),make('p',detail));return card;
- }));
- $('notes').replaceChildren(make('div','Slide notes','label'),...selected.notes.map(([title,detail])=>{
-  const d=make('details');d.append(make('summary',title),make('p',detail));return d;
- }));
- renderNavigation();
+ $('fields').replaceChildren(...st.fields.map(([key,value])=>{const row=make('div',undefined,'field');row.append(make('span',key),make('strong',value));return row;}));
+ $('operations').replaceChildren(...st.operations.map(([title,detail])=>{const card=make('article',undefined,'card');card.append(make('h3',title),make('p',detail));return card;}));
+ $('notes').replaceChildren(...selected.notes.map(([title,detail])=>{const d=make('details');d.append(make('summary',title),make('p',detail));return d;}));
+ nav();
+}
+function place(value,updateScroll=false){
+ const old=index;
+ position=Math.min(limit(),Math.max(0,value));
+ index=Math.floor(position);
+ if(old!==index)render();
+ $('scrub').value=position;
+ if(updateScroll)window.scrollTo(0,Math.round(position*span));
  draw();
 }
-$('down').onclick=()=>connectStack(0);
-$('up').onclick=()=>connectStack(1);
-$('prev').onclick=()=>move(-1);
-$('next').onclick=()=>move(1);
-$('reset').onclick=()=>seek(0);
-$('scrub').oninput=e=>seek(Number(e.target.value));
-$('play').onclick=()=>{
- if(playing){playing=false;$('play').textContent='▶ Play';return;}
- if(index===current().steps.length-1&&progress>=1)seek(0);
- playing=true;$('play').textContent='Ⅱ Pause';
+function layoutRail(){
+ const top=document.querySelector('header').offsetHeight;
+ document.documentElement.style.setProperty('--top',top+'px');
+ $('rail').style.height='calc(100svh + '+Math.ceil(limit()*span)+'px)';
+}
+function choose(id,choice=0,at=0){
+ mode=id;branch=choice;layer=2;position=Math.min(at,limit());index=Math.floor(position);
+ $('scrub').max=limit();$('scrub').step=.002;
+ $('concept-pop').hidden=true;hovered='';
+ layoutRail();render();place(position,true);
+}
+const mapStages=[
+ ['Incoming data link','Receive Ethernet, check FCS and remove framing',1],
+ ['Validate datagram','Invalid checksum → discard branch',1],
+ ['Find next-hop IP','Routing table: destination IP → outgoing interface and next-hop IP',2],
+ ['Update IPv4 header','Decrease TTL and update the header checksum',3],
+ ['Find next-hop MAC','ARP cache: next-hop IP → next-hop MAC',4],
+ ['Compare against MTU','Fits → send · DF clear → fragment · DF set → report error',5],
+ ['Outgoing data link','Queue and wrap each outgoing datagram or fragment in Ethernet',6]
+];
+for(const [name,hint,index] of mapStages){
+ const el=button(name,()=>{$('map-dialog').close();choose('journey',0,index);});
+ el.append(make('span',hint));$('map-stages').append(el);
+}
+$('router-map').onclick=()=>$('map-dialog').showModal();
+for(const [id,name] of tabs)$('lab-list').append(button(name,()=>{$('lab-dialog').close();choose(id);}));
+$('down').onclick=()=>choose('encap',0,6-layer);
+$('up').onclick=()=>choose('encap',1,layer);
+$('reset').onclick=()=>place(0,true);
+$('scrub').oninput=e=>place(Number(e.target.value),true);
+$('scrub').onkeydown=e=>{
+ if(e.key==='ArrowLeft'||e.key==='ArrowRight'){e.preventDefault();place(position+(e.key==='ArrowLeft'?-.12:.12),true);}
 };
-const canvas=$('canvas'),ctx=canvas.getContext('2d');
-const reduced=matchMedia('(prefers-reduced-motion: reduce)');
-function segment(a,b,color,width){
- ctx.strokeStyle=color;ctx.lineWidth=width;ctx.beginPath();ctx.moveTo(...a);ctx.lineTo(...b);ctx.stroke();
+addEventListener('scroll',()=>{if(!drag)place(scrollY/span);},{passive:true});
+addEventListener('resize',()=>{layoutRail();draw();});
+let packetLocation=null;
+canvas.onpointerdown=e=>{
+ if(e.button!==0)return;
+ const rect=canvas.getBoundingClientRect(),x=e.clientX-rect.left,y=e.clientY-rect.top;
+ if(!packetLocation||Math.hypot(x-packetLocation[0],y-packetLocation[1])>65)return;
+ e.preventDefault();canvas.setPointerCapture(e.pointerId);
+ drag={x:e.clientX,y:e.clientY,p:position,axis:null};
+};
+canvas.onpointermove=e=>{
+ if(!drag)return;
+ const dx=e.clientX-drag.x,dy=e.clientY-drag.y;
+ if(!drag.axis&&Math.hypot(dx,dy)>5)drag.axis=Math.abs(dx)>Math.abs(dy)?'x':'y';
+ const delta=drag.axis==='y'?dy:dx;
+ place(drag.p+delta/Math.max(92,canvas.clientWidth*.24),true);
+};
+canvas.onlostpointercapture=()=>{drag=null;};
+canvas.onpointerup=()=>{drag=null;};
+canvas.onpointercancel=()=>{drag=null;};
+function line(a,b,color,width=1){
+ ctx.beginPath();ctx.moveTo(...a);ctx.lineTo(...b);ctx.strokeStyle=color;ctx.lineWidth=width;ctx.stroke();
 }
 function box(x,y,w,h,r,fill,stroke){
  ctx.beginPath();ctx.roundRect(x,y,w,h,r);ctx.fillStyle=fill;ctx.fill();
  if(stroke){ctx.strokeStyle=stroke;ctx.lineWidth=1;ctx.stroke();}
 }
-function label(text,x,y,color='#b9cbe2',font='12px system-ui'){
- ctx.textAlign='center';ctx.textBaseline='middle';ctx.fillStyle=color;ctx.font=font;ctx.fillText(text,x,y);
+function label(text,x,y,color='#92aecb',size=11,align='center'){
+ ctx.textAlign=align;ctx.textBaseline='middle';ctx.font=size+'px monospace';ctx.fillStyle=color;ctx.fillText(text,x,y);
+}
+function token(x,y,text,color='#71b9ff',primary=false){
+ ctx.font='12px monospace';const width=ctx.measureText(text).width+21;
+ ctx.shadowBlur=primary?15:0;ctx.shadowColor='#2279d1';
+ box(x-width/2,y-13,width,26,3,'#102a47',color);
+ ctx.shadowBlur=0;label(text,x,y,'#e5f3ff',12);
+ if(primary)packetLocation=[x,y];
 }
 function draw(){
  const w=canvas.clientWidth,h=canvas.clientHeight,dpr=devicePixelRatio||1;
+ if(!w||!h)return;
  if(canvas.width!==Math.round(w*dpr)||canvas.height!==Math.round(h*dpr)){canvas.width=Math.round(w*dpr);canvas.height=Math.round(h*dpr);}
  ctx.setTransform(dpr,0,0,dpr,0,0);ctx.clearRect(0,0,w,h);
- ctx.fillStyle='#36516c';
- for(let x=13;x<w;x+=22)for(let y=14;y<h;y+=22)ctx.fillRect(x,y,1,1);
+ const st=currentStep(),frac=position-index,mid=h*(w<620?.47:.49);
+ const routed=mode==='journey'&&branch<5;
+ const p=st.paths[0];
+ const zoom=w<620?.79:1;
+ const world=routed?rnodes:null;
+ let xfocus=0;
+ if(world&&p)xfocus=world[p.from][0]+(world[p.to][0]-world[p.from][0])*frac;
+ const drift=Math.sin(position*.85)*Math.min(w*.12,120);
+ const cam=xfocus*zoom-drift+position*8;
+ ctx.fillStyle='#1a3554';
+ for(let x=(36-cam*.26%36)%36;x<w;x+=36)for(let y=26;y<h;y+=36)ctx.fillRect(x,y,1,1);
+ ctx.strokeStyle='#101c2c';ctx.lineWidth=1;
+ for(let x=(144-cam*.51%144)%144;x<w;x+=144){ctx.beginPath();ctx.moveTo(x,0);ctx.lineTo(x,h);ctx.stroke();}
  if(mode==='encap'){
-  const side=branch===0?'Sender':'Receiver';
-  label(side+' stack',w*.5,16,'#7fc0ff','700 12px system-ui');
+  const x=w*.46,ytop=128,gap=Math.min(44,Math.max(22,(h-210)/7)),width=Math.min(w-34,270);
   [...layerNames].reverse().forEach((name,n)=>{
-   const y=29+n*(h-37)/7,width=Math.min(w-30,300);
-   box((w-width)/2,y,width,Math.max(20,(h-37)/7-4),5,6-n===layer?'#17478a':'#131f32',6-n===layer?'#65e1ed':'#2a405e');
-   label((7-n)+'   '+name,w/2,y+(h-37)/14-2,6-n===layer?'#fff':'#a0b1c9');
+   const y=ytop+n*gap;
+   box(x-width/2,y,width,gap-4,3,n===6-layer?'#153658':'#080f1a','#264566');
+   label('L'+(7-n)+' '+name,x,y+(gap-4)/2);
+  });
+  const n=6-layer+(branch?-frac:frac)*.74;
+  token(x+width/2-30,ytop+n*gap+gap/2,'PDU','#71b9ff',true);return;
+ }
+ if(routed){
+  const offset=w*.4+drift-xfocus*zoom,pt=n=>[rnodes[n][0]*zoom+offset,mid+rnodes[n][1]*zoom];
+  const left=pt('I')[0]-110*zoom,right=pt('O')[0]+110*zoom;
+  box(left,mid-109,right-left,218,4,'#07111e','#284769');
+  label('R1 / NETWORK PLANE',left+15,mid-91,'#77b2f6',11,'left');
+  label('INGRESS',left+16,mid+88,'#587d9f',10,'left');
+  label('EGRESS',right-16,mid+88,'#587d9f',10,'right');
+  const chain=['A','I','V','F','H','N','M','O','R2','B'];
+  chain.slice(1).forEach((n,i)=>line(pt(chain[i]),pt(n),'#28507a',2));
+  [['V','Drop'],['M','Frag'],['Frag','O'],['M','ICMP']].forEach(([a,b])=>line(pt(a),pt(b),'#304763'));
+  [['F','Routing table','DA → NA'],['N','ARP table','NA → MAC'],['M','MTU table','eth1 → 1280 B']].forEach(([n,name,detail])=>{
+   const [x,y]=pt(n),dy=n==='M'?54:-57,sy=y+dy;
+   line([x,y],[x,sy],'#395d82');
+   box(x-59,sy-18,118,36,3,'#0a192b','#365779');
+   label(name,x,sy-6,'#bcdaff',10);label(detail,x,sy+8,'#82a6c9',10);
+  });
+  st.paths.forEach(path=>line(pt(path.from),pt(path.to),'#64a8f4',2.5));
+  for(const [n,value] of Object.entries(rnodes)){
+   const [x,y]=pt(n),active=p&&(n===p.from||n===p.to);
+   if(x<-170||x>w+170)continue;
+   const host=['A','B','R2'].includes(n);
+   if(host){
+    ctx.beginPath();ctx.ellipse(x,y-13,26,13,0,0,Math.PI*2);
+    ctx.fillStyle=active?'#164275':'#101f31';ctx.fill();ctx.strokeStyle='#659ad0';ctx.stroke();
+    if(n==='R2'){line([x-12,y-17],[x+12,y-9],'#c4e4ff',2);line([x-12,y-9],[x+12,y-17],'#c4e4ff',2);}
+    else label(n,x,y-13,'#d5e8ff');
+    label(value[2],x,y+18,'#c6e0f8');label(value[3],x,y+34,'#7e9fbd',10);
+   }else{
+    box(x-72*zoom,y-20,144*zoom,40,4,active?'#102744':'#0b1828',active?'#75b8ff':'#3c5877');
+    label(value[2],x,y-6,active?'#f0f8ff':'#a5c1da',w<620?9:11);
+    label(value[3],x,y+8,'#7fa0bd',w<620?8:9);
+   }
+  }
+  st.paths.forEach((path,i)=>{
+   const a=pt(path.from),b=pt(path.to),t=Math.max(0,(frac-path.delay)/(1-path.delay));
+   token(a[0]+(b[0]-a[0])*t,a[1]+(b[1]-a[1])*t-31-i*29,path.label,path.color,i===0);
   });
   return;
  }
- const selected=current(), st=currentStep(), positions={};
- selected.visible.forEach(id=>{positions[id]=[nodes[id][0]*w,nodes[id][1]*h];});
- selected.links.forEach(([from,to])=>segment(positions[from],positions[to],'#344968',2));
- st.paths.forEach(path=>segment(positions[path.from],positions[path.to],path.color,2));
- selected.visible.forEach(id=>{
-  const [x,y]=positions[id],[, ,name,address]=nodes[id];
-  const active=st.paths.some(path=>path.from===id||path.to===id);
-  box(x-18,y-17,36,34,8,active?'#17478a':'#142236',active?'#65e1ed':'#486889');
-  label(id==='ALT'?'R3':id,x,y,active?'#fff':'#bdcde3','700 12px system-ui');
-  label(name,x,y+28,active?'#edf6ff':'#9ab0cc',w<490?'10px system-ui':'12px system-ui');
-  const addressLabel=selected.aliases[id]??address;
-  if(w>=490)label(addressLabel,x,y+44,'#7fa0c4','11px ui-monospace');
+ const opt=current(),pt=n=>[nodes[n][0]*w,nodes[n][1]*h*.62+86];
+ opt.links.forEach(([a,b])=>line(pt(a),pt(b),'#2c4966',2));
+ st.paths.forEach(path=>line(pt(path.from),pt(path.to),path.color,2));
+ opt.visible.forEach(n=>{
+  const [x,y]=pt(n),active=st.paths.some(path=>path.from===n||path.to===n);
+  box(x-21,y-15,42,30,3,active?'#123254':'#0b1725','#456789');
+  label(n==='ALT'?'R3':n,x,y,'#c4e3ff');
+  label(nodes[n][2],x,y+24);
+  if(w>650)label(opt.aliases[n]??nodes[n][3],x,y+39,'#7b9dbf',9);
  });
- st.paths.forEach(path=>{
-  const {from,to,color,delay}=path;
-  const a=positions[from], b=positions[to];
-  const p=reduced.matches?.5:Math.max(0,Math.min(1,(progress-delay)/Math.min(.72,1-delay)));
-  const t=.19+.62*p;
-  const x=a[0]+(b[0]-a[0])*t,y=a[1]+(b[1]-a[1])*t;
-  ctx.font='700 10px ui-monospace';const width=ctx.measureText(path.label).width+14;
-  box(x-width/2,y-10,width,20,5,color);
-  label(path.label,x,y,'#091224','700 10px ui-monospace');
+ if(!p){token(w*.4,mid+45,'PDU','#71b9ff',true);return;}
+ st.paths.forEach((path,i)=>{
+  const a=pt(path.from),b=pt(path.to),t=Math.max(0,(frac-path.delay)/(1-path.delay));
+  token(a[0]+(b[0]-a[0])*t,a[1]+(b[1]-a[1])*t-28,path.label,path.color,i===0);
  });
-}
-function tick(now){
- if(playing) {
-  progress=Math.min(1,progress+Math.min(now-last,60)*Number($('speed').value)/2200);
-  if(progress===1){
-   if(index===current().steps.length-1){playing=false;$('play').textContent='▶ Play';}
-   else {index+=1;progress=0;render();}
-  }
-  draw();
- }
- last=now;
- requestAnimationFrame(tick);
 }
 new ResizeObserver(draw).observe(canvas);
-render();
-requestAnimationFrame(tick);
+choose('journey');
+
 </script></body></html>
