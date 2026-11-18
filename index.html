@@ -2,97 +2,117 @@
 <html lang="en">
 <head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="description" content="Follow a packet through the OSI model and experiment with network-layer protocols."><title>NetworkTrain — Packet Lab</title>
 <style>
-:root{color-scheme:dark;--bg:#0d0f13;--panel:#131821;--line:#2a3444;--ink:#f1f3f6;--muted:#b0b2b5;--blue:#a4a6a9;--cyan:#c6c8cb}*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--ink);font:15px/1.5 system-ui,sans-serif}button,select,input{font:inherit}button,select{color:inherit;background:#131821;border:1px solid var(--line);border-radius:8px;padding:8px 12px;cursor:pointer}button:hover,select:hover{border-color:var(--blue)}button:focus-visible,select:focus-visible,input:focus-visible{outline:2px solid var(--cyan);outline-offset:3px}button:disabled{opacity:.42;cursor:default}button[aria-pressed=true],.primary{background:#2a3444;border-color:#4a5c74}header{display:flex;gap:28px;align-items:center;padding:16px 24px;border-bottom:1px solid var(--line);background:#101319;flex-wrap:wrap}.brand{font-size:21px;font-weight:800;letter-spacing:-.6px;white-space:nowrap}.brand b{color:var(--blue);margin-right:10px}.toolbar,.controls,.branches,.pills{display:flex;align-items:center;gap:8px;flex-wrap:wrap}.toolbar button{padding:7px 10px}.layout{display:grid;grid-template-columns:204px minmax(0,1fr) 312px;max-width:1700px;margin:auto;min-height:85vh}aside{padding:24px 16px;border-right:1px solid var(--line)}aside.inspector{border-right:0;border-left:1px solid var(--line)}main{padding:26px;min-width:0}h1,h2,h3,p{margin:0}h1{font-size:clamp(24px,3vw,38px);line-height:1.16;letter-spacing:-1px}h2{font-size:18px}h3{font-size:15px}small,.muted{color:var(--muted)}.label{font:700 11px/1.5 ui-monospace,monospace;letter-spacing:.12em;text-transform:uppercase;color:var(--blue)}.layers{display:grid;gap:7px;margin:12px 0 18px}.layer{display:flex;text-align:left;align-items:center;gap:9px}.layer span{font:12px ui-monospace;color:var(--blue)}.layer[aria-pressed=true]{box-shadow:inset 3px 0 var(--cyan)}.directions{display:grid;gap:7px}.intro{margin:7px 0 18px}.stage{border:1px solid var(--line);border-radius:14px;overflow:hidden;background:#101319}.stage-heading{padding:15px 17px;border-bottom:1px solid var(--line);display:flex;justify-content:space-between;gap:12px;align-items:center}.live{color:var(--cyan);white-space:nowrap}.stage canvas{display:block;width:100%;height:300px;background:radial-gradient(ellipse at 50% 55%,#1b222d,#101319 75%)}.controls{padding:12px;border-top:1px solid var(--line)}.controls input{flex:1;min-width:95px;accent-color:var(--blue)}.branches{margin:12px 0}.branches .label{width:100%}.cards{display:grid;grid-template-columns:repeat(auto-fit,minmax(155px,1fr));gap:9px;margin-top:14px}.card,details{background:var(--panel);border:1px solid var(--line);border-radius:9px;padding:11px}.card p{color:var(--muted);margin-top:3px;font-size:13px}.inspector h2{margin:7px 0 8px}.inspector p{font-size:14px;color:var(--muted)}.stack{display:flex;flex-wrap:wrap;gap:5px;margin:16px 0}.stack span{background:#2a3444;border:1px solid #354760;padding:5px 7px;border-radius:5px;font:12px ui-monospace;color:#e9ebee}.fields{margin:14px 0 20px}.field{padding:8px 0;border-bottom:1px solid var(--line);display:grid;gap:2px}.field span{font-size:12px;color:var(--muted)}.field strong{font:13px ui-monospace;overflow-wrap:anywhere}.notes{margin-top:16px}.notes details{margin-top:7px}.notes summary{cursor:pointer;color:#e3e5e8}.notes p{color:var(--muted);margin-top:8px}dialog{max-width:620px;width:calc(100% - 28px);background:#131821;color:var(--ink);border:1px solid var(--line);border-radius:12px;padding:22px}dialog::backdrop{background:#08090bcc}.dialog-top{display:flex;justify-content:space-between;align-items:center;gap:12px;margin-bottom:12px}.source-list li{margin:7px 0}.tools-end{margin-left:auto}@media(max-width:1050px){.layout{grid-template-columns:166px minmax(0,1fr)}aside.inspector{grid-column:2;border-left:0;border-top:1px solid var(--line);padding:20px 26px}main{padding:20px}.stage canvas{height:280px}}@media(max-width:650px){header{padding:12px;gap:9px}.layout{display:block}aside,main,aside.inspector{padding:12px}.layout>aside:first-child{border-bottom:1px solid var(--line);border-right:0}.layers{display:flex;overflow:auto;margin:7px 0}.layer{white-space:nowrap}.directions{display:flex;flex-wrap:wrap}.stage canvas{height:250px}.stage-heading{align-items:flex-start}.tools-end{margin-left:0}}
+:root{color-scheme:dark;--bg:#0f0f0f;--panel:#181818;--line:#343434;--ink:#f3f3f3;--muted:#b2b2b2;--blue:#a6a6a6;--cyan:#c8c8c8}*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--ink);font:15px/1.5 system-ui,sans-serif}button,select,input{font:inherit}button,select{color:inherit;background:#181818;border:1px solid var(--line);border-radius:8px;padding:8px 12px;cursor:pointer}button:hover,select:hover{border-color:var(--blue)}button:focus-visible,select:focus-visible,input:focus-visible{outline:2px solid var(--cyan);outline-offset:3px}button:disabled{opacity:.42;cursor:default}button[aria-pressed=true],.primary{background:#343434;border-color:#5b5b5b}header{display:flex;gap:28px;align-items:center;padding:16px 24px;border-bottom:1px solid var(--line);background:#131313;flex-wrap:wrap}.brand{font-size:21px;font-weight:800;letter-spacing:-.6px;white-space:nowrap}.brand b{color:var(--blue);margin-right:10px}.toolbar,.controls,.branches,.pills{display:flex;align-items:center;gap:8px;flex-wrap:wrap}.toolbar button{padding:7px 10px}.layout{display:grid;grid-template-columns:204px minmax(0,1fr) 312px;max-width:1700px;margin:auto;min-height:85vh}aside{padding:24px 16px;border-right:1px solid var(--line)}aside.inspector{border-right:0;border-left:1px solid var(--line)}main{padding:26px;min-width:0}h1,h2,h3,p{margin:0}h1{font-size:clamp(24px,3vw,38px);line-height:1.16;letter-spacing:-1px}h2{font-size:18px}h3{font-size:15px}small,.muted{color:var(--muted)}.label{font:700 11px/1.5 ui-monospace,monospace;letter-spacing:.12em;text-transform:uppercase;color:var(--blue)}.layers{display:grid;gap:7px;margin:12px 0 18px}.layer{display:flex;text-align:left;align-items:center;gap:9px}.layer span{font:12px ui-monospace;color:var(--blue)}.layer[aria-pressed=true]{box-shadow:inset 3px 0 var(--cyan)}.directions{display:grid;gap:7px}.intro{margin:7px 0 18px}.stage{border:1px solid var(--line);border-radius:14px;overflow:hidden;background:#131313}.stage-heading{padding:15px 17px;border-bottom:1px solid var(--line);display:flex;justify-content:space-between;gap:12px;align-items:center}.live{color:var(--cyan);white-space:nowrap}.stage canvas{display:block;width:100%;height:300px;background:radial-gradient(ellipse at 50% 55%,#222222,#131313 75%)}.controls{padding:12px;border-top:1px solid var(--line)}.controls input{flex:1;min-width:95px;accent-color:var(--blue)}.branches{margin:12px 0}.branches .label{width:100%}.cards{display:grid;grid-template-columns:repeat(auto-fit,minmax(155px,1fr));gap:9px;margin-top:14px}.card,details{background:var(--panel);border:1px solid var(--line);border-radius:9px;padding:11px}.card p{color:var(--muted);margin-top:3px;font-size:13px}.inspector h2{margin:7px 0 8px}.inspector p{font-size:14px;color:var(--muted)}.stack{display:flex;flex-wrap:wrap;gap:5px;margin:16px 0}.stack span{background:#343434;border:1px solid #464646;padding:5px 7px;border-radius:5px;font:12px ui-monospace;color:#ebebeb}.fields{margin:14px 0 20px}.field{padding:8px 0;border-bottom:1px solid var(--line);display:grid;gap:2px}.field span{font-size:12px;color:var(--muted)}.field strong{font:13px ui-monospace;overflow-wrap:anywhere}.notes{margin-top:16px}.notes details{margin-top:7px}.notes summary{cursor:pointer;color:#e5e5e5}.notes p{color:var(--muted);margin-top:8px}dialog{max-width:620px;width:calc(100% - 28px);background:#181818;color:var(--ink);border:1px solid var(--line);border-radius:12px;padding:22px}dialog::backdrop{background:#090909cc}.dialog-top{display:flex;justify-content:space-between;align-items:center;gap:12px;margin-bottom:12px}.source-list li{margin:7px 0}.tools-end{margin-left:auto}@media(max-width:1050px){.layout{grid-template-columns:166px minmax(0,1fr)}aside.inspector{grid-column:2;border-left:0;border-top:1px solid var(--line);padding:20px 26px}main{padding:20px}.stage canvas{height:280px}}@media(max-width:650px){header{padding:12px;gap:9px}.layout{display:block}aside,main,aside.inspector{padding:12px}.layout>aside:first-child{border-bottom:1px solid var(--line);border-right:0}.layers{display:flex;overflow:auto;margin:7px 0}.layer{white-space:nowrap}.directions{display:flex;flex-wrap:wrap}.stage canvas{height:250px}.stage-heading{align-items:flex-start}.tools-end{margin-left:0}}
 </style>
 <style>
-:root{--bg:#08090b;--panel:#0d0f13;--line:#2a3444;--ink:#eceef1;--muted:#a7a9ac;--blue:#a8aaad;--cyan:#c6c8cb;--top:64px}
+:root{--bg:#090909;--panel:#0f0f0f;--line:#343434;--ink:#eeeeee;--muted:#a9a9a9;--blue:#aaaaaa;--cyan:#c8c8c8;--top:64px}
 body{overflow-anchor:none;font-family:ui-monospace,SFMono-Regular,Consolas,"Liberation Mono",monospace;overscroll-behavior:none}
-header{position:fixed;inset:0 0 auto;z-index:5;min-height:64px;padding:10px 22px;background:#0d0f13f7;gap:17px;flex-wrap:nowrap}
+header{position:fixed;inset:0 0 auto;z-index:5;min-height:64px;padding:10px 22px;background:#0f0f0ff7;gap:17px;flex-wrap:nowrap}
 .brand{font-weight:700;font-size:17px;letter-spacing:-.06em}.brand b{font-size:18px}
 .toolbar{flex:1;min-width:0;flex-wrap:nowrap;overflow-x:auto;scrollbar-width:thin}
-button,select{border-radius:3px;background:#101319;padding:7px 9px;font-size:12px}
+button,select{border-radius:3px;background:#131313;padding:7px 9px;font-size:12px}
 .tools-end{white-space:nowrap}
-#concept-pop{position:fixed;top:calc(var(--top) + 8px);left:min(16vw,210px);z-index:8;width:min(430px,calc(100vw - 30px));padding:14px;background:#101319;border:1px solid #354760;box-shadow:0 10px 40px #000b}
+#concept-pop{position:fixed;top:calc(var(--top) + 8px);left:min(16vw,210px);z-index:8;width:min(430px,calc(100vw - 30px));padding:14px;background:#131313;border:1px solid #464646;box-shadow:0 10px 40px #000b}
 #concept-pop p{font-size:12px;color:var(--muted);margin-top:6px}
 #concept-pop[hidden]{display:none}
-.layout{position:fixed;top:var(--top);left:0;right:0;height:calc(100svh - var(--top));min-height:0;display:grid;grid-template-columns:142px minmax(0,1fr);max-width:none;background:#08090b}
-.layout>aside:first-child{z-index:2;background:#0d0f13;border-color:#1b222d;padding:18px 10px}
-.layer{gap:6px;width:100%;font-size:11px;padding:9px 6px}.layer[aria-pressed=true]{background:#1b222d}.layer span{font-size:10px}
+.layout{position:fixed;top:var(--top);left:0;right:0;height:calc(100svh - var(--top));min-height:0;display:grid;grid-template-columns:142px minmax(0,1fr);max-width:none;background:#090909}
+.layout>aside:first-child{z-index:2;background:#0f0f0f;border-color:#222222;padding:18px 10px}
+.layer{gap:6px;width:100%;font-size:11px;padding:9px 6px}.layer[aria-pressed=true]{background:#222222}.layer span{font-size:10px}
 main{position:relative;padding:0;overflow:hidden;height:100%}
-.stage{position:absolute;inset:0;border:0;border-radius:0;background:#08090b;overflow:hidden}
-.stage canvas{width:100%;height:100%;background:#08090b;touch-action:none;cursor:grab}.stage canvas:active{cursor:grabbing}
-.stage-heading{position:absolute;z-index:2;top:88px;left:22px;right:22px;padding:0;border:0;pointer-events:none}.stage-heading h2{font-size:14px;color:#cdcfd2}.stage-heading small{letter-spacing:.08em}
+.stage{position:absolute;inset:0;border:0;border-radius:0;background:#090909;overflow:hidden}
+.stage canvas{width:100%;height:100%;background:#090909;touch-action:none;cursor:grab}.stage canvas:active{cursor:grabbing}
+.stage-heading{position:absolute;z-index:2;top:88px;left:22px;right:22px;padding:0;border:0;pointer-events:none}.stage-heading h2{font-size:14px;color:#cfcfcf}.stage-heading small{letter-spacing:.08em}
 .overlay{position:absolute;z-index:2;pointer-events:none;top:14px;left:22px;right:22px}.overlay>*{pointer-events:auto;width:max-content;max-width:100%}
 .overlay h1{font-family:inherit;font-size:clamp(22px,3vw,34px);letter-spacing:-.07em;margin:2px 0 0}.overlay .intro{display:none}.overlay .branches{margin-top:4px;gap:5px}.branches .label{display:none}
-.controls{position:absolute;bottom:9px;left:20px;right:20px;z-index:3;background:#101319ec;border:1px solid var(--line);padding:6px 9px;border-radius:4px}.controls input{min-width:30px}.controls small{font-size:11px}
-.cards{position:absolute;z-index:2;bottom:55px;left:20px;right:300px;display:flex;gap:6px;flex-wrap:wrap;pointer-events:none}.card{max-width:260px;border-radius:3px;background:#101319ed;padding:7px 9px}.card h3{font-size:11px;color:#cbcdd0}.card p{font-size:11px}
-aside.inspector{position:absolute;bottom:56px;right:20px;z-index:3;width:260px;max-height:36%;overflow:auto;background:#101319f5;border:1px solid var(--line);border-radius:4px;padding:10px;overscroll-behavior:contain}.inspector h2{font-size:13px}.inspector p{font-size:11px}.stack{margin:8px 0 3px}.stack span{font-size:10px;padding:2px 4px}.fields{margin:4px 0}.field{display:flex;justify-content:space-between;gap:8px;padding:4px 0}.field span,.field strong{font-size:10px}.field strong{text-align:right}
+.controls{position:absolute;bottom:9px;left:20px;right:20px;z-index:3;background:#131313ec;border:1px solid var(--line);padding:6px 9px;border-radius:4px}.controls input{min-width:30px}.controls small{font-size:11px}
+.cards{position:absolute;z-index:2;bottom:55px;left:20px;right:300px;display:flex;gap:6px;flex-wrap:wrap;pointer-events:none}.card{max-width:260px;border-radius:3px;background:#131313ed;padding:7px 9px}.card h3{font-size:11px;color:#cdcdcd}.card p{font-size:11px}
+aside.inspector{position:absolute;bottom:56px;right:20px;z-index:3;width:260px;max-height:36%;overflow:auto;background:#131313f5;border:1px solid var(--line);border-radius:4px;padding:10px;overscroll-behavior:contain}.inspector h2{font-size:13px}.inspector p{font-size:11px}.stack{margin:8px 0 3px}.stack span{font-size:10px;padding:2px 4px}.fields{margin:4px 0}.field{display:flex;justify-content:space-between;gap:8px;padding:4px 0}.field span,.field strong{font-size:10px}.field strong{text-align:right}
 #rail{padding-top:var(--top)}#map-stages{display:grid;gap:5px;margin-top:14px}#map-stages button{text-align:left}#map-stages span{display:block;color:var(--muted);margin-top:2px}
-dialog{border-radius:4px}a{color:#b8babd}#notes details{margin-top:6px}#notes summary{cursor:pointer}
+dialog{border-radius:4px}a{color:#bababa}#notes details{margin-top:6px}#notes summary{cursor:pointer}
 @media(max-width:760px){header{padding:7px 9px;gap:8px}.brand{font-size:13px}.brand b{margin-right:4px}.tools-end{display:none}.layout{grid-template-columns:1fr;grid-template-rows:auto minmax(0,1fr)}.layout>aside:first-child{padding:4px 7px;border-right:0;border-bottom:1px solid var(--line)}.layout>aside:first-child>.label{display:none}.layers{margin:0 0 4px;gap:4px}.layer{width:auto;padding:4px 6px}.directions{display:flex;gap:4px}.directions button{padding:3px 6px}.overlay,.stage-heading{left:9px;right:9px}.stage-heading{top:83px}.stage-heading h2{font-size:11px}.cards{display:none}.controls{left:8px;right:8px}.controls small{display:none}aside.inspector{right:8px;bottom:49px;width:min(270px,75vw);max-height:27%;padding:6px}.inspector h2{margin:2px 0}.overlay .branches button{padding:3px 5px;font-size:10px}#concept-pop{left:10px}}
 </style>
 <style>
-:root{--bg:#08090b;--panel:#101319;--line:#2a3444;--ink:#ebedf0;--muted:#aeb0b3;--blue:#989a9d;--cyan:#a1a3a6}
+:root{--bg:#090909;--panel:#131313;--line:#343434;--ink:#ededed;--muted:#b0b0b0;--blue:#9a9a9a;--cyan:#a3a3a3}
 body{font-family:Inter,"Segoe UI",system-ui,sans-serif}
-header{background:#0d0f13f8;border-color:#1b222d}
+header{background:#0f0f0ff8;border-color:#222222}
 .brand{font-family:inherit;letter-spacing:-.045em;font-size:19px}
-.brand b,.layer span{color:#9a9c9f}
+.brand b,.layer span{color:#9c9c9c}
 .overlay h1{letter-spacing:-.055em;font-weight:700;font-size:clamp(25px,3vw,38px)}
 .label,.field strong,.layer span,.live{font-family:ui-monospace,SFMono-Regular,Consolas,monospace}
-.label{color:#9fa1a4}.live,.stage-heading h2{color:#babcbf}
-button,select{background:#131821;border-color:#2a3444;font-weight:550}
-button[aria-pressed=true],.layer[aria-pressed=true]{background:#1b222d;border-color:#354760;box-shadow:none}
+.label{color:#a1a1a1}.live,.stage-heading h2{color:#bcbcbc}
+button,select{background:#181818;border-color:#343434;font-weight:550}
+button[aria-pressed=true],.layer[aria-pressed=true]{background:#222222;border-color:#464646;box-shadow:none}
 .stage canvas,.stage canvas:active{cursor:default}
-.stage canvas{background:#08090b}
-.controls{background:#101319f5}.controls small{color:#c6c8cb}
-.controls input{accent-color:#354760}
-.layout>aside:first-child{background:#0d0f13}
-.card,.inspector{background:#101319f5!important}
-.card h3{color:#c7c9cc}
-.overlay>.intro{display:block;font-size:12px;margin:3px 0 4px;color:#abadb0;max-width:60ch}
+.stage canvas{background:#090909}
+.controls{background:#131313f5}.controls small{color:#c8c8c8}
+.controls input{accent-color:#464646}
+.layout>aside:first-child{background:#0f0f0f}
+.card,.inspector{background:#131313f5!important}
+.card h3{color:#c9c9c9}
+.overlay>.intro{display:block;font-size:12px;margin:3px 0 4px;color:#adadad;max-width:60ch}
 .overlay>.intro:empty{display:none}
 .stage-heading{top:111px}
 #hit-layer{pointer-events:none;position:absolute;inset:0;z-index:1}
 .path-hit{position:absolute;pointer-events:auto;background:transparent;border:1px solid transparent;padding:0;cursor:default;border-radius:6px}
-.path-hit:hover,.path-hit:focus-visible{background:#2a344425;border-color:#4a5c74}
+.path-hit:hover,.path-hit:focus-visible{background:#34343425;border-color:#5b5b5b}
 .packet-hit{background:transparent}
-#lesson-drawer{position:absolute;z-index:6;right:0;top:0;bottom:0;width:min(440px,95vw);background:#101319;border-left:1px solid #2a3444;box-shadow:-16px 0 50px #000b;overflow:auto;overscroll-behavior:contain;padding:19px}
+#lesson-drawer{position:absolute;z-index:6;right:0;top:0;bottom:0;width:min(440px,95vw);background:#131313;border-left:1px solid #343434;box-shadow:-16px 0 50px #000b;overflow:auto;overscroll-behavior:contain;padding:19px}
 #lesson-drawer[hidden]{display:none}
 .drawer-head{display:flex;justify-content:space-between;align-items:start;gap:9px}
 .drawer-head h2{font-size:23px;letter-spacing:-.045em;line-height:1.12;margin:5px 0 7px}
-.drawer-body{font-size:14px;color:#d1d3d6}
+.drawer-body{font-size:14px;color:#d3d3d3}
 .drawer-body>p{margin:0 0 13px}.drawer-body>.label{margin:14px 0 5px}
 .lesson-flow{list-style:none;display:grid;gap:14px;margin:8px 0 15px;padding:0}
-.lesson-flow li{position:relative;padding:8px 11px;border:1px solid #2a3444;background:#131821;border-radius:4px;color:#e5e7ea}
-.lesson-flow li+li::before{content:"↓";position:absolute;left:15px;top:-17px;color:#afb1b4;font-family:monospace}
-.lesson-flow li[data-branch]{margin-left:20px;border-color:#354760;background:#131821}
+.lesson-flow li{position:relative;padding:8px 11px;border:1px solid #343434;background:#181818;border-radius:4px;color:#e7e7e7}
+.lesson-flow li+li::before{content:"↓";position:absolute;left:15px;top:-17px;color:#b1b1b1;font-family:monospace}
+.lesson-flow li[data-branch]{margin-left:20px;border-color:#464646;background:#181818}
 .lesson-flow li[data-branch]::before{content:"↳";left:-18px;top:5px}
-.lsa-topology{margin:14px 0;text-align:center}.topology-peers{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;padding-bottom:17px}.topology-peers>div{position:relative;background:#1b222d;border:1px solid #354760;border-radius:4px;padding:6px}.topology-peers small{display:block}.topology-peers>div::after{content:"";position:absolute;height:18px;width:1px;background:#4a5c74;left:50%;top:100%}.topology-lan{background:#1b222d;border-top:2px solid #4a5c74;padding:6px}.lesson-example{padding:9px 11px;background:#131821;border-left:2px solid #4a5c74}
+.lsa-topology{margin:14px 0;text-align:center}.topology-peers{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;padding-bottom:17px}.topology-peers>div{position:relative;background:#222222;border:1px solid #464646;border-radius:4px;padding:6px}.topology-peers small{display:block}.topology-peers>div::after{content:"";position:absolute;height:18px;width:1px;background:#5b5b5b;left:50%;top:100%}.topology-lan{background:#222222;border-top:2px solid #5b5b5b;padding:6px}.lesson-example{padding:9px 11px;background:#181818;border-left:2px solid #5b5b5b}
 .drawer-body details{padding:7px 9px;margin-top:6px;border-radius:4px}
-.drawer-body details summary{cursor:pointer;color:#d0d2d5;font-weight:590}
-.drawer-body details p{margin-top:7px;color:#cdcfd2}
+.drawer-body details summary{cursor:pointer;color:#d2d2d2;font-weight:590}
+.drawer-body details p{margin-top:7px;color:#cfcfcf}
 .lesson-links{display:flex;gap:6px;flex-wrap:wrap;margin-top:10px}
-#lesson-index{margin:11px 0}.lesson-group{margin:10px 0}.lesson-group h3{color:#cdcfd2;margin-bottom:4px}.lesson-group button{margin:2px 3px 2px 0}
+#lesson-index{margin:11px 0}.lesson-group{margin:10px 0}.lesson-group h3{color:#cfcfcf;margin-bottom:4px}.lesson-group button{margin:2px 3px 2px 0}
 small.lesson-ref{display:block;font-size:11px;margin:7px 0 12px}
 @media(max-width:760px){.stage-heading{top:119px}.overlay>.intro{font-size:11px}.overlay h1{font-size:24px}.controls button{padding:4px 5px}.path-hit{border-radius:4px}#lesson-drawer{padding:12px}}
 </style>
 <style>
-:root{--bg:#090a0c;--panel:#14181e;--line:#30343b;--ink:#eceef0;--muted:#a4a8af;--blue:#a4a8af;--cyan:#c0c4c9}
-header{background:#101114;border-color:#2b2e34}
-.layout,.stage,.stage canvas{background:#090a0c}
-.layout>aside:first-child{background:#121418;border-color:#2b2e34}
-button,select{background:#191c21;border-color:#373c44}
-button:hover,select:hover{border-color:#777d87}
-button[aria-pressed=true],.layer[aria-pressed=true]{background:#132743;border-color:#344d6b;color:#eceef0;box-shadow:inset 2px 0 #59708b}
-.controls,.card,.inspector{background:#15171bf5!important;border-color:#33373e}
-.stack span{background:#17263b;border-color:#34465e;color:#d6d9dd}
-#lesson-drawer,#concept-pop,dialog{background:#14161a;border-color:#3a4049}
-.lesson-flow li,.topology-peers>div,.topology-lan{background:#14243a;border-color:#3a4c63}
-.lesson-flow li[data-branch],.lesson-example{background:#191d24;border-color:#4a515d}
-.path-hit:hover,.path-hit:focus-visible{background:#192e4c42;border-color:#63728a}
+:root{--bg:#0a0a0a;--panel:#181818;--line:#343434;--ink:#eeeeee;--muted:#a8a8a8;--blue:#a8a8a8;--cyan:#c4c4c4}
+header{background:#111111;border-color:#2e2e2e}
+.layout,.stage,.stage canvas{background:#0a0a0a}
+.layout>aside:first-child{background:#141414;border-color:#2e2e2e}
+button,select{background:#1c1c1c;border-color:#3c3c3c}
+button:hover,select:hover{border-color:#7d7d7d}
+button[aria-pressed=true],.layer[aria-pressed=true]{background:#262626;border-color:#4b4b4b;color:#eeeeee;box-shadow:inset 2px 0 #6e6e6e}
+.controls,.card,.inspector{background:#171717f5!important;border-color:#373737}
+.stack span{background:#252525;border-color:#454545;color:#d9d9d9}
+#lesson-drawer,#concept-pop,dialog{background:#161616;border-color:#404040}
+.lesson-flow li,.topology-peers>div,.topology-lan{background:#232323;border-color:#4b4b4b}
+.lesson-flow li[data-branch],.lesson-example{background:#1d1d1d;border-color:#515151}
+.path-hit:hover,.path-hit:focus-visible{background:#2d2d2d42;border-color:#717171}
+</style>
+<style>
+header{background:#101010}.layout>aside:first-child{background:#141414}
+button[aria-pressed=true],.layer[aria-pressed=true]{background:#2c2c2c;color:#f5f5f5;border-color:#595959;box-shadow:inset 2px 0 #b5b5b5}
+.controls,.card,.inspector{background:#191919f5!important}
+#definitions-dialog{width:min(740px,calc(100vw - 28px));max-width:none;max-height:86svh;overflow:auto;padding:0}
+.glossary-head{position:sticky;top:0;z-index:1;background:#161616;padding:16px 20px 10px;border-bottom:1px solid #393939}
+.glossary-filters{display:flex;gap:7px;flex-wrap:wrap}
+.glossary-filters input{flex:1;min-width:140px;font:inherit;color:#f2f2f2;background:#222;border:1px solid #555;border-radius:4px;padding:7px 9px}
+.glossary-filters input:focus-visible{outline:2px solid #b5b5b5;outline-offset:2px}
+#def-status{display:block;margin-top:7px}#definition-list{padding:6px 20px 20px}
+.definition-item{margin-top:7px;background:#1c1c1c;border-color:#363636}
+.definition-item[open]{border-color:#606060}
+.definition-item summary{color:#eee;cursor:pointer;font-weight:600}
+.definition-item p{margin:8px 0;color:#d2d2d2}
+.definition-item .label{display:block;margin-bottom:2px}
+.definition-item .lesson-ref{margin:7px 0}
+.keyword-list{display:flex;flex-wrap:wrap;gap:5px;margin:8px 0 14px}
+.keyword-list button{font-size:11px;background:#222}
+@media(max-width:760px){#definitions-button{font-size:11px;padding:5px 6px} .glossary-head{padding:12px}#definition-list{padding:5px 12px 12px}}
 </style></head>
 <body>
-<header><div class="brand"><b>⇄</b>NetworkTrain</div><nav class="toolbar" aria-label="Concepts at this point" id="toolbar"></nav><button class="tools-end" id="sources">Slide coverage</button></header>
+<header><div class="brand"><b>⇄</b>NetworkTrain</div><nav class="toolbar" aria-label="Concepts at this point" id="toolbar"></nav><button id="definitions-button">Definitions</button><button class="tools-end" id="sources">Slide coverage</button></header>
 <div id="concept-pop" hidden></div><div id="rail"><div class="layout">
 <aside><div class="label">OSI model</div><nav class="layers" aria-label="OSI layers" id="layers"></nav><div class="directions"><button id="down">↓ Sender stack</button><button id="up">↑ Receiver stack</button></div></aside>
 <main><div class="overlay"><div class="label" id="section"></div><h1 id="title"></h1><p class="intro muted" id="intro"></p><div class="branches" id="branches"></div></div>
@@ -101,7 +121,11 @@ button[aria-pressed=true],.layer[aria-pressed=true]{background:#132743;border-co
 <div class="cards" id="operations"></div></main>
 <aside class="inspector" aria-label="Packet inspector"><div class="label">Packet inspector</div><h2 id="inspect-title"></h2><p id="inspect-description"></p><div class="stack" id="stack"></div><div class="fields" id="fields"></div><button id="inspect-more">Explain this stage</button></aside><aside id="lesson-drawer" aria-label="Concept lesson" hidden><div class="drawer-head"><div><div class="label" id="lesson-group"></div><h2 id="lesson-title"></h2></div><button id="lesson-close" aria-label="Close concept lesson">Close</button></div><div class="drawer-body" id="lesson-body"></div></aside>
 </div></div>
-<dialog id="map-dialog"><div class="dialog-top"><h2>R1 · Router map</h2><form method="dialog"><button>Close</button></form></div><p class="muted">Follow the datagram from the incoming interface to the outgoing interface. Select a stage to jump there.</p><div id="map-stages"></div></dialog><dialog id="lab-dialog"><div class="dialog-top"><h2>Packet labs</h2><form method="dialog"><button>Close</button></form></div><div class="branches" id="lab-list"></div><h3>Concept library</h3><div id="lesson-index"></div><section class="notes" id="notes"></section></dialog>
+<dialog id="definitions-dialog" aria-labelledby="definitions-title">
+ <div class="glossary-head"><div class="dialog-top"><h2 id="definitions-title">Definitions &amp; keywords</h2><form method="dialog"><button>Close</button></form></div>
+ <div class="glossary-filters"><input id="definition-search" type="search" aria-label="Search terms, abbreviations and descriptions" placeholder="Search e.g. DF, transit, or poison reverse"><select id="definition-group" aria-label="Definition topic"><option value="">All topics</option></select><button id="definition-context" aria-pressed="false">Current stage</button></div>
+ <small id="def-status" aria-live="polite"></small></div><div id="definition-list"></div>
+</dialog><dialog id="map-dialog"><div class="dialog-top"><h2>R1 · Router map</h2><form method="dialog"><button>Close</button></form></div><p class="muted">Follow the datagram from the incoming interface to the outgoing interface. Select a stage to jump there.</p><div id="map-stages"></div></dialog><dialog id="lab-dialog"><div class="dialog-top"><h2>Packet labs</h2><form method="dialog"><button>Close</button></form></div><div class="branches" id="lab-list"></div><h3>Concept library</h3><div id="lesson-index"></div><section class="notes" id="notes"></section></dialog>
 <dialog id="source-dialog"><div class="dialog-top"><h2>Slide coverage</h2><form method="dialog"><button>Close</button></form></div><ul class="source-list" id="source-list"></ul></dialog>
 <script>
 'use strict';
@@ -118,7 +142,7 @@ const layerData=[
 const nodes={A:[.12,.48,'Host A','192.0.2.10'],R1:[.35,.48,'Router R1','192.0.2.1'],R2:[.65,.48,'Router R2','198.51.100.2'],B:[.88,.48,'Host B','203.0.113.20'],C:[.65,.82,'Host C','Local listener'],D:[.35,.82,'Host D','Local listener'],ALT:[.5,.17,'Router R3','Alternate path']};
 const packet=['Ethernet','IPv4','Transport','Data','FCS'];
 const step=(title,description,paths=[],operations=[],fields=[],stack=packet)=>({title,description,paths,operations,fields,stack});
-const send=(from,to,label='IPv4',color='#4a5c74',delay=0)=>({from,to,label,color,delay});
+const send=(from,to,label='IPv4',color='#5b5b5b',delay=0)=>({from,to,label,color,delay});
 const direct=[
  step('Compare the destination with the local subnet','Host A and Host B are on 192.0.2.0/24. Host A resolves Host B’s MAC from Host B’s IP.',[],[['Next-hop IP','192.0.2.20']],[['Destination IP','192.0.2.20'],['Network prefix','192.0.2.0/24']],['IPv4','Transport','Data']),
  step('Send directly across the LAN','The IPv4 and Ethernet destination both identify Host B. There is no IP router on this path.',[send('A','B')],[['Direct delivery','A switch may forward the frame within the LAN.']],[['Source IP','192.0.2.10'],['Destination IP','192.0.2.20'],['Destination MAC','Host B'],['TTL','64']])
@@ -150,8 +174,8 @@ lab('arp','ARP','Resolve an IPv4 next hop to a MAC address before transmitting t
  ...['Cache miss · gateway','Cache hit','Direct delivery'].map((label,i)=>{const target=i===2?'B':'R1';const ip=i===2?'192.0.2.20':'192.0.2.1';
  const lookup=step('Look up '+ip,i===1?'The cached MAC can be used immediately.':'The cache has no usable mapping. Host A must ask on the LAN.',[],[['ARP cache',i===1?'Hit':'Miss']],[['Target IP',ip]],['IPv4 datagram waiting']);
  return option(label,[lookup,...(i===1?[]:[
- step('Broadcast the ARP request','Devices on this LAN see the request. Only the owner of the target IP replies in this example.',lan.slice(1).map(n=>send('A',n,'ARP request','#c4c7cc')),[['Sender','Host A includes its own IP and MAC.'],['Receivers','Check the target protocol address in parallel.']],[['Operation','1 · Request'],['Sender IP','192.0.2.10'],['Sender MAC','Host A MAC'],['Target IP',ip],['Target hardware address','Unknown, shown as zeros'],['Ethernet destination','ff:ff:ff:ff:ff:ff']],['Ethernet','ARP','FCS']),
- step('Return the ARP reply','The target replies to Host A, which saves the mapping in its cache.',[send(target,'A','ARP reply','#97999c')],[['Cache','Install '+ip+' → '+target+' MAC.']],[['Operation','2 · Reply'],['Sender IP',ip],['Sender MAC',target+' MAC'],['Target IP','192.0.2.10'],['Ethernet destination','Host A MAC']],['Ethernet','ARP','FCS'])
+ step('Broadcast the ARP request','Devices on this LAN see the request. Only the owner of the target IP replies in this example.',lan.slice(1).map(n=>send('A',n,'ARP request','#c7c7c7')),[['Sender','Host A includes its own IP and MAC.'],['Receivers','Check the target protocol address in parallel.']],[['Operation','1 · Request'],['Sender IP','192.0.2.10'],['Sender MAC','Host A MAC'],['Target IP',ip],['Target hardware address','Unknown, shown as zeros'],['Ethernet destination','ff:ff:ff:ff:ff:ff']],['Ethernet','ARP','FCS']),
+ step('Return the ARP reply','The target replies to Host A, which saves the mapping in its cache.',[send(target,'A','ARP reply','#999999')],[['Cache','Install '+ip+' → '+target+' MAC.']],[['Operation','2 · Reply'],['Sender IP',ip],['Sender MAC',target+' MAC'],['Target IP','192.0.2.10'],['Ethernet destination','Host A MAC']],['Ethernet','ARP','FCS'])
  ]),step('Release the waiting datagram','Host A now has a MAC for the local next hop.',[send('A',target)],[['Frame destination',target+' MAC']],[['IPv4 destination',i===2?ip:'203.0.113.20'],['Ethernet destination',target+' MAC']])],lan,lanLinks,lanAlias);})
 ],[['ARP packet format','Hardware Type 1 means Ethernet. Protocol Type 0x0800 means IPv4. Address lengths are 6 and 4 bytes. Operation 1 is request and 2 is reply. Ethernet identifies ARP with EtherType 0x0806.'],['Where to resolve','Host to local host, host to gateway, router to next router, or final router to destination host. Every resolution applies to the outgoing local network.'],['Proxy ARP','A proxy router can answer for another IP using its own MAC, then forward traffic onward.']]);
 const routes=[['203.0.113.128/26','R3','m2'],['203.0.113.128/25','R2','m1'],['0.0.0.0/0','R2','m1']];
@@ -166,29 +190,29 @@ lab('forward','IP forwarding','Choose an address and compare every matching rout
 const switchingNotes=[['Delay formulas','Transmission = L/R. Propagation = distance/speed. Add queueing and processing where specified. A store-and-forward packet across N equal links takes N × (transmission + propagation) before extra waiting.'],['Worked example','5,000 bits over a 1 Gbps link take 5 µs to transmit. With 10 µs propagation per link, two links take 30 µs and four links take 60 µs.'],['Circuit example','After setup, a bit stream can pipeline along the reserved circuit. Add setup, serialization of the message, and propagation across the path, plus teardown only if asked.']];
 lab('switch','Switching','Choose how the network moves traffic, then watch setup and transmission on the topology.',[
  option('Datagram',[
- step('Send independent datagrams','Routers select the next hop from the destination IP. A route change can send a later packet along a different path.',[send('A','R1','Packet 1'),send('A','R1','Packet 2','#97999c',.35)],[['Store and forward','Receive the full frame before transmitting it on the next link.']]),
- step('Forwarding paths diverge','Illustrative routing change sends the two datagrams toward different next hops.',[send('R1','R2','Packet 1'),send('R1','ALT','Packet 2','#97999c')],[['Possible outcome','Different arrival times and out-of-order delivery.']]),
- step('Both packets arrive','Host B receives separate datagrams. Its transport protocol may handle ordering.',[send('R2','B','Packet 1'),send('ALT','B','Packet 2','#97999c')])
+ step('Send independent datagrams','Routers select the next hop from the destination IP. A route change can send a later packet along a different path.',[send('A','R1','Packet 1'),send('A','R1','Packet 2','#999999',.35)],[['Store and forward','Receive the full frame before transmitting it on the next link.']]),
+ step('Forwarding paths diverge','Illustrative routing change sends the two datagrams toward different next hops.',[send('R1','R2','Packet 1'),send('R1','ALT','Packet 2','#999999')],[['Possible outcome','Different arrival times and out-of-order delivery.']]),
+ step('Both packets arrive','Host B receives separate datagrams. Its transport protocol may handle ordering.',[send('R2','B','Packet 1'),send('ALT','B','Packet 2','#999999')])
  ],['A','R1','R2','ALT','B'],[['A','R1'],['R1','R2'],['R2','B'],['R1','ALT'],['ALT','B']]),
  ...['Virtual circuit','Circuit switching'].map((label,i)=>option(label,[
- step('Set up the path','A setup request travels through the switches and a confirmation returns.',[send('A','R1','Setup'),send('R1','R2','Setup','#4a5c74',.32),send('R2','B','Setup','#4a5c74',.64)]),
- step('Confirm the path','The destination confirms that setup is complete.',[send('B','R2','Confirm'),send('R2','R1','Confirm','#4a5c74',.32),send('R1','A','Confirm','#4a5c74',.64)]),
- step(i?'Transmit the bit stream':'Forward using VC identifiers',i?'Resources are reserved. Bits can be present on several links as the stream advances.':'All packets follow the established path. A switch maps incoming interface and VC identifier to an outgoing pair.',[send('A','R1',i?'Bits':'VC 7'),send('R1','R2',i?'Bits':'VC 12','#97999c',i?.12:.32),send('R2','B',i?'Bits':'VC 5','#97999c',i?.24:.64)],[['Forwarding state',i?'Reserved circuit':'Local VC identifiers']],[['Path','A → R1 → R2 → B']],[i?'Bit stream':'VC header','Payload']),
- step('Release state','When the connection closes, the switches release the circuit or virtual-circuit state.',[send('A','R1','Release'),send('R1','R2','Release','#4a5c74',.32),send('R2','B','Release','#4a5c74',.64)])
+ step('Set up the path','A setup request travels through the switches and a confirmation returns.',[send('A','R1','Setup'),send('R1','R2','Setup','#5b5b5b',.32),send('R2','B','Setup','#5b5b5b',.64)]),
+ step('Confirm the path','The destination confirms that setup is complete.',[send('B','R2','Confirm'),send('R2','R1','Confirm','#5b5b5b',.32),send('R1','A','Confirm','#5b5b5b',.64)]),
+ step(i?'Transmit the bit stream':'Forward using VC identifiers',i?'Resources are reserved. Bits can be present on several links as the stream advances.':'All packets follow the established path. A switch maps incoming interface and VC identifier to an outgoing pair.',[send('A','R1',i?'Bits':'VC 7'),send('R1','R2',i?'Bits':'VC 12','#999999',i?.12:.32),send('R2','B',i?'Bits':'VC 5','#999999',i?.24:.64)],[['Forwarding state',i?'Reserved circuit':'Local VC identifiers']],[['Path','A → R1 → R2 → B']],[i?'Bit stream':'VC header','Payload']),
+ step('Release state','When the connection closes, the switches release the circuit or virtual-circuit state.',[send('A','R1','Release'),send('R1','R2','Release','#5b5b5b',.32),send('R2','B','Release','#5b5b5b',.64)])
  ]))
 ],switchingNotes);
 const routerNet=['R1','R2','ALT','B'];const routerLinks=[['R1','R2'],['R1','ALT'],['R2','B'],['ALT','B']];
 const ripFields=version=>[['Transport','UDP destination port 520'],['RIP command','2 · Response'],['Version',version],['Address family','2 · IPv4'],['Destination network','203.0.113.0'],...(version===2?[['Subnet mask','255.255.255.0'],['Route tag','0 in this example'],['Next hop','0.0.0.0 · use sender']]:[]),['Metric','2 hops']];
-const ospf=(title,desc,from,to,type,fields=[],ops=[])=>step(title,desc,[send(from,to,title.split(' · ')[0],'#97999c')],ops,[['OSPF Version','2'],['OSPF Packet Type',type],['Area ID','0.0.0.0'],['IP protocol','89'],...fields],['IPv4','OSPF header · 24 B','OSPF body']);
+const ospf=(title,desc,from,to,type,fields=[],ops=[])=>step(title,desc,[send(from,to,title.split(' · ')[0],'#999999')],ops,[['OSPF Version','2'],['OSPF Packet Type',type],['Area ID','0.0.0.0'],['IP protocol','89'],...fields],['IPv4','OSPF header · 24 B','OSPF body']);
 lab('route','Routing protocols','See the control packets that build routing tables. Choose a protocol or a failure scenario.',[
  ...[1,2].map(i=>option('RIPv'+i,[
  step('Send a RIP request','A newly started router can request routes from a neighbor.',[send('R1','R2','Request')],[['RIP command','1 · Request']],[['Transport','UDP 520'],['RIP version',i]],['IPv4','UDP','RIP']),
- step('Exchange distance vectors','Each router advertises its current distances. R1 evaluates the offers arriving from two neighbors.',[send('R2','R1','Response'),send('ALT','R1','Response','#97999c')],[['Via R2','1 + 2 = 3 hops'],['Via R3','1 + 4 = 5 hops']],ripFields(i),['IPv4','UDP','RIP']),
+ step('Exchange distance vectors','Each router advertises its current distances. R1 evaluates the offers arriving from two neighbors.',[send('R2','R1','Response'),send('ALT','R1','Response','#999999')],[['Via R2','1 + 2 = 3 hops'],['Via R3','1 + 4 = 5 hops']],ripFields(i),['IPv4','UDP','RIP']),
  step('Install the best route','The distance-vector update adds local link cost to each neighbor’s advertised cost and chooses the minimum.',[],[['Bellman–Ford update','min(3, 5) = 3 via R2.']],[['Metric','3 hops'],['Next hop','R2'],['Regular updates',i===1?'Broadcast':'Multicast 224.0.0.9']],['Routing table'])
  ],routerNet,routerLinks)),
  option('RIP failure',[
- step('A route becomes unreachable','R2 detects the failure and marks the route metric 16. A triggered update can notify neighbors without waiting for the regular timer.',[send('R2','R1','Metric 16','#c4c7cc')],[['Route poisoning','16 means unreachable.'],['Next hop','R1 invalidates its route through R2 unless it finds a valid alternative.']],[['Metric','16'],['Update','Triggered']],['IPv4','UDP','RIP']),
- step('Prevent a two-router loop','A route learned from a neighbor is either omitted in updates back to that neighbor (split horizon) or explicitly advertised back as 16 (poison reverse).',[send('R1','R2','Poison reverse','#c4c7cc')],[['Count to infinity','Stale neighbor advertisements can otherwise cause repeated metric increases.']],[['Metric','16'],['Direction','Back toward learned next hop']],['IPv4','UDP','RIP']),
+ step('A route becomes unreachable','R2 detects the failure and marks the route metric 16. A triggered update can notify neighbors without waiting for the regular timer.',[send('R2','R1','Metric 16','#c7c7c7')],[['Route poisoning','16 means unreachable.'],['Next hop','R1 invalidates its route through R2 unless it finds a valid alternative.']],[['Metric','16'],['Update','Triggered']],['IPv4','UDP','RIP']),
+ step('Prevent a two-router loop','A route learned from a neighbor is either omitted in updates back to that neighbor (split horizon) or explicitly advertised back as 16 (poison reverse).',[send('R1','R2','Poison reverse','#c7c7c7')],[['Count to infinity','Stale neighbor advertisements can otherwise cause repeated metric increases.']],[['Metric','16'],['Direction','Back toward learned next hop']],['IPv4','UDP','RIP']),
  step('Expire and collect stale routes','For a route that receives no updates, expiration starts at the last accepted update. After expiration it remains in the table temporarily with metric 16.',[],[['Periodic','One per router, roughly every 30 seconds.'],['Expiration','180 seconds per valid route in the slide model.'],['Garbage collection','120 seconds per expired route in the slide model.']],[['Worked example','20 entries, 5 silent for 200 s'],['Timers running','1 + 15 + 5 = 21'],['Garbage time left','120 − (200 − 180) = 100 s']],['Routing table'])
  ],routerNet,routerLinks),
  option('OSPF exchange',[
@@ -212,7 +236,7 @@ lab('route','Routing protocols','See the control packets that build routing tabl
  step('Open a BGP session','BGP peers use an established TCP connection. OPEN negotiates session parameters.',[send('R1','R2','OPEN')],[['Session','eBGP across autonomous systems, iBGP within one AS.']],[['Transport','TCP port 179'],['BGP type','1 · OPEN']],['IPv4','TCP','BGP']),
  step('Confirm with KEEPALIVE','The peer confirms the OPEN and periodic keepalives can keep the session active.',[send('R2','R1','KEEPALIVE')],[],[['BGP type','4 · KEEPALIVE']],['IPv4','TCP','BGP']),
  step('Advertise or withdraw prefixes','The UPDATE conveys reachable prefixes and their path attributes or withdraws previously announced routes.',[send('R2','R1','UPDATE')],[['AS_PATH','R1 checks whether its own AS appears in the path.'],['Policy','A router can prefer a route based on configured policy.']],[['BGP type','2 · UPDATE'],['NLRI','203.0.113.0/24'],['AS_PATH','64502 64503'],['NEXT_HOP','R2'],['ORIGIN','IGP in this example']],['IPv4','TCP','BGP']),
- step('Report a session error','A BGP NOTIFICATION reports an error and closes the session.',[send('R1','R2','NOTIFICATION','#c4c7cc')],[],[['BGP type','3 · NOTIFICATION']],['IPv4','TCP','BGP'])
+ step('Report a session error','A BGP NOTIFICATION reports an error and closes the session.',[send('R1','R2','NOTIFICATION','#c7c7c7')],[],[['BGP type','3 · NOTIFICATION']],['IPv4','TCP','BGP'])
  ],routerNet,routerLinks,{R1:'AS 64501',R2:'AS 64502',ALT:'Alternate peer',B:'External prefix'})
 ],[
  ['Distance vector vs link state vs path vector','RIP learns distances and next hops from neighbors. OSPF floods LSAs and runs Dijkstra on its database. BGP exchanges prefixes and path attributes across peering sessions.'],
@@ -271,7 +295,7 @@ function routerJourney(variant){
   detailStep('Cross the transit network','The frame leaves R1 and travels to R2. End-to-end IP addresses are carried inside the new Ethernet frame.','O','R2',[['Link transmission','The sender serializes the frame.'],['Signal propagation','Bits travel across the transit link.']],[['Source MAC','R1 eth1'],['Destination MAC','R2 ingress'],['TTL','63']]),
   detailStep('Deliver to Host B',variant===1?'R2 forwards the fragments to the directly connected subnet. Host B reassembles them before handing the payload to transport.':'R2 forwards directly to Host B. Host B receives the frame, removes the headers, and passes the payload upward.','R2','B',[['Direct delivery','R2 resolves Host B’s MAC using Host B’s IP.'],['Receiver',variant===1?'Reassemble using Identification, offsets and MF.':'Deliver the IP payload to the indicated transport protocol.']],[['Destination MAC','Host B'],['TTL','62']])
  );
- if(variant===1)for(const st of stages.slice(-3)){const path=st.paths[0];path.label='Frag 1';st.paths.push(send(path.from,path.to,'Frag 2','#a5a7aa',.21));}
+ if(variant===1)for(const st of stages.slice(-3)){const path=st.paths[0];path.label='Frag 1';st.paths.push(send(path.from,path.to,'Frag 2','#a7a7a7',.21));}
  return stages;
 }
 const mainBranches=['Fits MTU','Fragment · DF 0','Drop · DF 1','Invalid header','Expired TTL'];
@@ -437,6 +461,178 @@ lesson('arp-legacy','ARP','Proxy ARP, RARP and four routing cases','ARP deck · 
  ['Host to local host → resolve host IP','Host to gateway → resolve gateway IP','Router to router → resolve next router IP','Final router to host → resolve destination IP'],
  'A proxy answers who-has 141.23.56.21 with the proxy’s own MAC. The sender uses that MAC in its frame, and the proxy forwards the IP packet.',
  [['What replaced RARP?','BOOTP and later DHCP provide host configuration, including an IPv4 address.'],['Does proxy ARP change the IP destination?','The destination remains the original target IP. The frame’s destination is the proxy MAC.']]);
+const definitions=[
+["Network layer", "The OSI layer that addresses and transfers packets across interconnected networks.", "The source creates the datagram, intermediate routers forward it, and the destination delivers its payload.", "sender"],
+["Logical address", "An address used at the network layer to identify an interface or delivery destination.", "IPv4 uses the destination address in the datagram to choose a route.", "sender"],
+["Encapsulation", "Wrapping a payload with the control information of the carrying protocol.", "Ethernet wraps an IP datagram with a frame header and trailer before transmission.", "sender"],
+["Decapsulation", "Removing a protocol’s wrapper so the enclosed payload can be processed.", "R1 removes the incoming Ethernet wrapper before reading the IPv4 header.", "sender"],
+["Datagram", "A self-contained packet handled independently in a connectionless network.", "Each IPv4 datagram carries the destination used for forwarding.", "sender"],
+["Direct delivery", "Delivery to a destination on the sender’s own connected network.", "R2 can frame the packet directly to Host B’s MAC.", "sender"],
+["Indirect delivery", "Delivery through a router because the destination is on a different network.", "Host A uses its gateway’s MAC while keeping Host B’s IP in the datagram.", "sender"],
+["Gateway", "A router a host uses as a next hop to reach other networks.", "The host’s default route often names its local gateway.", "sender"],
+["Protocol data unit (PDU)", "A protocol’s unit of transfer, including the relevant control fields and payload.", "The lab shows application data, the transport unit, the IP datagram, the link frame, and then transmitted bits.", "sender"],
+["OSI model", "A reference model with Physical, Data Link, Network, Transport, Session, Presentation, and Application layers.", "Following a packet down the model shows wrapping and transmission. Following it up shows delivery and interpretation.", "sender"],
+["Ingress interface", "The router interface on which a frame arrives.", "It receives the frame and passes the enclosed datagram to IP.", "ingress"],
+["Ethernet frame", "The link-layer unit that carries addresses, an EtherType or length field, payload, and a frame check sequence.", "Its destination MAC applies only to the current Ethernet link.", "ingress"],
+["MAC address", "A link-layer address used to identify an Ethernet sender or receiver.", "The next router’s ingress MAC is the destination on a router-to-router hop.", "ingress"],
+["EtherType", "An Ethernet field identifying the protocol carried by the frame.", "0x0800 identifies IPv4 and 0x0806 identifies ARP.", "ingress"],
+["Frame Check Sequence (FCS)", "An Ethernet trailer used to detect corruption in the frame.", "The ingress interface checks it before accepting the payload.", "ingress"],
+["IPv4 header", "The control information in front of the IPv4 payload.", "It contains addresses, TTL, protocol and the information needed to forward or reassemble the packet.", "validate"],
+["Internet Header Length (IHL)", "The IPv4 header length measured in 32-bit words.", "An IHL of 5 means a 20-byte header.", "validate"],
+["Total Length", "The IPv4 header and payload size together, in bytes.", "The router compares this size with the outgoing MTU.", "validate"],
+["IP Protocol field", "The number identifying the protocol carried inside an IPv4 datagram.", "1 identifies ICMP, 6 TCP, 17 UDP, and 89 OSPF.", "validate"],
+["Local delivery", "Handing an IP payload to a protocol running on the receiving device.", "An OSPF router processes a local OSPF message instead of forwarding it as ordinary transit traffic.", "validate"],
+["Forwarding", "Selecting an outgoing interface and next hop for an individual packet.", "R1 consults the installed forwarding entries when it sees Host B’s destination IP.", "forward"],
+["Destination address (DA)", "The logical IP destination extracted from the datagram.", "The router uses DA for the route lookup.", "forward"],
+["Next-hop address (NA)", "The IP address of the device that should receive the datagram on the selected outgoing link.", "R1 obtains the address from its route and supplies it to ARP.", "forward"],
+["Next-hop method", "Storing only the next forwarding hop in each route entry.", "Each downstream router independently chooses its own next hop.", "forward"],
+["Network-specific route", "One entry that covers destinations in a network prefix.", "An entry for 203.0.113.0/24 handles every matching destination unless a more-specific route wins.", "forward"],
+["Host-specific route", "A route that matches one exact host address.", "An IPv4 /32 can steer one host differently from the rest of its subnet.", "forward"],
+["Default route", "The least-specific route, used when no more-specific route matches.", "IPv4 uses 0.0.0.0/0 as the catch-all prefix.", "forward"],
+["Routing table", "A collection of reachability entries used to derive forwarding decisions.", "A conceptual slide entry records prefix, next hop and outgoing interface.", "forward"],
+["Longest prefix match", "Selecting the matching route with the greatest prefix length.", "For 203.0.113.140, a matching /26 takes priority over a matching /25.", "forward"],
+["Output interface", "The port selected to send a packet toward its next hop.", "The route may select eth1, which determines both the local link and its MTU.", "forward"],
+["Forwarding table search", "Finding a usable entry by matching the destination against stored routes.", "A prefix trie can track the most specific match as it traverses the address bits.", "forward"],
+["Classful addressing", "Historical IPv4 addressing in which address classes imply default network masks.", "A, B and C use /8, /16 and /24 respectively in the slide method.", "classful"],
+["Subnet mask", "A bit mask marking the network prefix bits in an IPv4 address.", "Bitwise AND of an address and its mask yields the network address.", "classful"],
+["Subnetting", "Dividing an address block into smaller prefixes.", "Dividing 145.14.0.0/16 into /18s gives four subnets beginning at third-octet values 0, 64, 128 and 192.", "classful"],
+["Network address", "The address obtained when the host bits of a prefix are set to zero.", "145.14.32.78 with a /18 mask belongs to 145.14.0.0/18.", "classful"],
+["Classless Inter-Domain Routing (CIDR)", "Addressing and routing with an explicit prefix length instead of an implied address class.", "The same forwarding table can contain /18, /25, /32, and /0 entries.", "cidr"],
+["Prefix length", "The number of high-order address bits that identify the network.", "A /26 matches the first 26 bits.", "cidr"],
+["Address aggregation", "Representing multiple contiguous, aligned blocks with a common shorter prefix.", "120.14.64.0/18 covers four aligned /20 blocks.", "cidr"],
+["Hierarchical routing", "Organizing route information at several levels of detail.", "A regional ISP advertises an aggregate outward and retains customer routes internally.", "cidr"],
+["Geographical routing", "A scheme that uses geographical grouping to organize route information.", "The slides discuss geography as a possible basis for aggregation.", "cidr"],
+["Time to Live (TTL)", "An IPv4 field that limits how long a datagram can circulate.", "R1 reduces 64 to 63 and R2 reduces 63 to 62.", "ttl"],
+["IPv4 header checksum", "A checksum over the IPv4 header used to detect header corruption.", "R1 updates it after changing TTL.", "ttl"],
+["Internet Control Message Protocol (ICMP)", "A companion protocol to IP for error reports and diagnostics.", "A router can report an expired TTL or a packet too large to forward with DF set.", "ttl"],
+["Time Exceeded", "An ICMP message indicating that forwarding TTL or a reassembly timer expired.", "A router that consumes the final TTL can send type 11, code 0 back to the source.", "ttl"],
+["Address Resolution Protocol (ARP)", "A protocol for finding a local link-layer address for a known IPv4 next-hop address.", "R1 resolves the next router’s ingress MAC on eth1.", "arp"],
+["ARP request", "A query asking which local device owns the target protocol address.", "On Ethernet it is normally broadcast to ff:ff:ff:ff:ff:ff.", "arp"],
+["ARP reply", "A response reporting the mapping between an IPv4 address and a hardware address.", "The owner typically sends the reply directly to the requester’s MAC.", "arp"],
+["Hardware type (HTYPE)", "The ARP field identifying the link hardware.", "Ethernet uses 1.", "arp"],
+["Protocol type (PTYPE)", "The ARP field identifying the protocol address family being resolved.", "IPv4 uses 0x0800, even though the enclosing Ethernet EtherType for ARP is 0x0806.", "arp"],
+["Hardware and protocol address lengths (HLEN, PLEN)", "The sizes in bytes of the hardware and protocol addresses in ARP.", "Ethernet uses 6-byte hardware addresses and IPv4 uses 4-byte protocol addresses.", "arp"],
+["ARP operation (OPER)", "A field identifying which ARP operation the message performs.", "ARP request uses 1 and reply uses 2.", "arp"],
+["Sender and target address fields", "The sender hardware and protocol address and the target hardware and protocol address carried in ARP.", "A request supplies the target IPv4 address and can leave the unknown target MAC all zeros.", "arp"],
+["ARP cache", "A temporary table of local next-hop IP-to-MAC mappings and resolution state.", "A cache hit lets the interface transmit immediately.", "arp-cache"],
+["FREE", "An unused or reclaimed slot in the slide’s ARP cache model.", "It can be allocated for a new resolution.", "arp-cache"],
+["PENDING", "An ARP cache entry waiting for resolution.", "Datagrams needing that mapping join a queue while ARP waits or retries.", "arp-cache"],
+["RESOLVED", "An ARP cache entry with a known hardware address.", "The output module can send queued datagrams with the learned MAC.", "arp-cache"],
+["ARP output module", "The part of the slide’s ARP model that consults the cache for outgoing datagrams.", "It either sends with a known MAC, queues under an existing request, or sends a new request.", "arp-cache"],
+["ARP input module", "The part that handles received ARP requests and replies.", "It can learn a mapping from the sender fields and release the corresponding waiting queue.", "arp-cache"],
+["Cache-control module", "The part that ages ARP entries and manages retries.", "It can expire a resolved entry or reclaim a pending entry after attempts run out.", "arp-cache"],
+["Proxy ARP", "Answering a local ARP query on behalf of another IP with the proxy’s own MAC.", "The sender delivers the frame to the proxy, which forwards the original IP packet.", "arp-legacy"],
+["Reverse ARP (RARP)", "A historical protocol that used a known hardware address to obtain an IP address.", "It served bootstrapping, a role later handled through BOOTP and DHCP.", "arp-legacy"],
+["Maximum Transmission Unit (MTU)", "The maximum size of an IP packet that a link can carry in one frame, excluding the link-layer framing.", "A 1500-byte datagram exceeds a 1280-byte outgoing MTU.", "mtu"],
+["Fragmentation", "Dividing a large IPv4 datagram into smaller IP datagrams.", "With DF clear, R1 can produce two fragments for the smaller link.", "mtu"],
+["Don’t Fragment (DF)", "The IPv4 flag that forbids routers from fragmenting a datagram.", "If a DF packet exceeds the MTU, the router drops it and can report the next-hop MTU.", "mtu"],
+["More Fragments (MF)", "The flag indicating that another fragment follows in the original datagram.", "The earlier fragment has MF 1 and the final fragment has MF 0.", "mtu"],
+["Fragment Offset", "The position of this fragment’s payload in the original datagram, measured in eight-byte units.", "A fragment beginning after 1256 payload bytes has offset 157.", "mtu"],
+["Identification", "An IPv4 header field that helps the receiver group fragments of an original datagram.", "Both fragments retain the same value.", "mtu"],
+["Reassembly", "Reconstructing the original IPv4 datagram from received fragments.", "The destination uses offsets to place the fragment payloads before handing the result to transport.", "mtu"],
+["Fragmentation Needed", "An ICMP Destination Unreachable message for an IPv4 datagram that cannot fit an outgoing link and has DF set.", "The type 3, code 4 response can tell the sender the limiting MTU.", "mtu"],
+["Egress interface", "The outgoing router interface selected for a packet.", "It applies the local link-layer framing and transmits the frame.", "egress"],
+["Output queue", "A buffer holding packets or frames waiting for an outgoing interface.", "If another frame is already being serialized, the new packet can wait here.", "egress"],
+["Switched network", "A network in which intermediate nodes establish paths or forward units between endpoints.", "A circuit switch reserves a channel, while a packet switch chooses an outgoing link for traffic.", "switching"],
+["Circuit switching", "Establishing a path and reserving resources before transmitting a stream.", "The stream passes through the established connection until teardown.", "switching"],
+["Packet switching", "Breaking information into packets and forwarding them through intermediate devices.", "Datagram and virtual-circuit switching are the two methods compared in the slides.", "switching"],
+["Datagram switching", "Handling packets independently using their destination and the current forwarding information.", "Two packets may follow different routes and arrive in a different order.", "switching"],
+["Virtual circuit (VC)", "A logical packet path established before data transfer.", "Switches use local incoming and outgoing VC identifiers to move packets along it.", "switching"],
+["Setup phase", "The exchange that establishes a circuit or virtual-circuit path.", "A request travels forward and confirmation returns before data transmission.", "switching"],
+["Teardown phase", "The release of resources or state after a connection ends.", "The switches remove the reservation or VC mappings.", "switching"],
+["Store and forward", "Receiving an entire unit before retransmitting it on the next link.", "One store-and-forward switch causes a packet to be serialized on two links.", "switching"],
+["Transmission delay", "Time to place a packet’s L bits onto a link at R bits per second, L/R.", "5000 bits at 1 Gbps takes 5 microseconds per link.", "delay"],
+["Propagation delay", "Time for a bit to cross a link, calculated as distance divided by propagation speed.", "Count it once for each physical link the packet traverses.", "delay"],
+["Queueing delay", "Time waiting for service at a device or outgoing interface.", "It grows when packets arrive faster than the interface can transmit them.", "delay"],
+["Processing delay", "Time spent inspecting and processing a packet at a device.", "A router can check the header and perform its forwarding lookup during processing.", "delay"],
+["End-to-end delay", "The total of applicable processing, queueing, transmission and propagation delays along the path.", "Add setup for a circuit-switching example when the question includes it.", "delay"],
+["Unicast", "Communication to one addressed receiver.", "A normal Ethernet hop sends a unicast frame to the chosen next hop.", "scope"],
+["Broadcast", "Communication directed to every receiver in the applicable broadcast domain.", "An Ethernet ARP request is a link-layer broadcast.", "scope"],
+["Multicast", "Communication directed to receivers belonging to an addressed group.", "RIPv2 can send updates to IPv4 multicast group 224.0.0.9.", "scope"],
+["Routing", "Building or selecting reachability information before packets are forwarded.", "Protocols such as RIP or OSPF supply routes that a router can install.", "routing"],
+["Cost or metric", "A value used to compare candidate paths under a routing protocol.", "RIP counts hops and OSPF adds configured link costs.", "routing"],
+["Static route", "A route installed through configuration.", "A host or router can have a manually configured default route.", "routing"],
+["Dynamic route", "A route learned through a routing protocol and updated as reachability changes.", "A link failure can cause a learned route to be withdrawn or replaced.", "routing"],
+["Autonomous system (AS)", "A network or group of networks under a common routing administration.", "An AS can run OSPF internally and exchange external reachability with BGP.", "routing"],
+["Intradomain routing", "Routing within one autonomous system.", "RIP and OSPF are intradomain protocols.", "routing"],
+["Interdomain routing", "Routing between autonomous systems.", "External BGP exchanges reachability across AS boundaries.", "routing"],
+["Control plane", "The systems that learn and maintain routing or forwarding state.", "OSPF can update a route table independently of the packet currently being forwarded.", "routing"],
+["Data plane", "The systems that apply installed state to individual packets.", "R1’s forwarding lookup chooses the output interface for the packet on screen.", "routing"],
+["Distance vector", "A routing approach in which neighbors share estimated costs to destinations.", "R1 receives neighbor estimates and adds its cost of reaching each neighbor.", "bellman"],
+["Bellman–Ford update", "A rule that minimizes local cost to a neighbor plus the neighbor’s advertised cost to the destination.", "If the candidates are 1 + 2 and 1 + 4, choose 3 via the first neighbor.", "bellman"],
+["Convergence", "The process by which routing information stabilizes after a topology or policy change.", "Neighbors may need several rounds of updates to learn a newly reachable network.", "bellman"],
+["Count to infinity", "Successive metric increases caused by routers learning circular paths from each other after failure.", "RIP uses 16 as its unreachable metric, bounding the count.", "loop"],
+["Split horizon", "Omitting a route from announcements sent back toward the neighbor it was learned from.", "If A uses B for X, A leaves X out of the applicable update to B.", "loop"],
+["Poison reverse", "Advertising a route as unreachable back toward the neighbor used to reach it.", "A explicitly advertises X as 16 to B in the applicable RIP update.", "loop"],
+["Route poisoning", "Advertising a failed route with an unreachable metric.", "A router detecting a disconnection can announce metric 16 to its neighbors.", "loop"],
+["Triggered update", "An update sent in response to a route change outside the periodic schedule.", "A route failure can be announced before the next regular RIP update.", "loop"],
+["Two-node instability", "A routing loop in which two routers incorrectly use each other as the next hop.", "Split horizon or poison reverse can interrupt this two-router feedback.", "loop"],
+["Three-node instability", "A routing loop involving three routers.", "Poison reverse aimed back at one neighbor does not eliminate every multi-router loop.", "loop"],
+["Routing Information Protocol (RIP)", "An intradomain distance-vector protocol using hop count and UDP port 520.", "A received route has usable metric 1–15. Metric 16 means unreachable.", "rip"],
+["RIP Request", "A RIP message that asks another router for routing information.", "A new router can request a full set of routes. The command is 1.", "rip"],
+["RIP Response", "A RIP message carrying route entries.", "It may answer a request or be periodic or triggered. The command is 2.", "rip"],
+["Route entry", "A destination advertisement and its metric inside a RIP message.", "RIPv2 includes a route tag, subnet mask and next-hop field in the entry.", "rip"],
+["Address family identifier (AFI)", "The RIP field describing the addressing family in a route entry.", "The IPv4 family value is 2.", "rip"],
+["RIPv1", "The classful version of RIP, which omits subnet masks from route entries.", "The slide example sends regular updates using broadcast.", "rip"],
+["RIPv2", "The version of RIP that carries masks and additional attributes and supports authentication.", "It can multicast to 224.0.0.9 and carry classless prefixes.", "rip"],
+["Route tag", "A RIPv2 field providing administrative information about the origin of a route.", "An implementation can preserve it when distinguishing imported routes.", "rip"],
+["RIPv2 next-hop field", "The field suggesting a next hop for the route.", "0.0.0.0 means use the originator of the RIP advertisement.", "rip"],
+["Periodic timer", "The RIP process timer for regular update transmission.", "One router has one timer in the slide model, with updates about every 30 seconds.", "timers"],
+["Expiration timer", "A timer tracking how long a learned route has gone without a valid update.", "The slide route is marked unreachable after 180 seconds.", "timers"],
+["Garbage collection timer", "The time an expired route is retained before deletion.", "The slide keeps the route for 120 more seconds while it can be advertised as unreachable.", "timers"],
+["Link state", "A router’s description of its own links, including their destinations and costs.", "Other routers use the descriptions to reconstruct the topology.", "dijkstra"],
+["Link-state packet (LSP)", "A generic routing message describing local connections and their state.", "In OSPF, link-state advertisements carry this information within updates.", "dijkstra"],
+["Flooding", "Propagating newer link-state information throughout its allowed scope.", "Routers relay newer advertisements and use version information to suppress stale copies.", "dijkstra"],
+["Link-state database (LSDB)", "A collection of the current link-state advertisements for the relevant scope.", "An OSPF router uses its area LSDB to compute internal paths.", "dijkstra"],
+["Dijkstra’s algorithm", "An algorithm for finding shortest paths from a root over nonnegative link costs.", "Settle the least-cost unsettled node, then update distance estimates through it.", "dijkstra"],
+["Shortest-path tree (SPT)", "The tree of best paths rooted at the calculating router.", "R1 finds B’s next hop by reading the first link on the tree path to B.", "dijkstra"],
+["Open Shortest Path First (OSPF)", "An intradomain link-state routing protocol that computes paths using cost.", "It floods advertisements and runs a shortest-path calculation.", "areas"],
+["OSPF area", "A logical subdivision of an OSPF routing domain.", "Detailed topology flooding is scoped by area for area-local advertisements.", "areas"],
+["Backbone area", "Area 0, the central OSPF area used in inter-area routing.", "An ABR connects another area to the backbone logically or physically.", "areas"],
+["Area Border Router (ABR)", "A router connecting OSPF areas.", "It reports reachability from one area into another, including through Type 3 advertisements.", "areas"],
+["Autonomous System Boundary Router (ASBR)", "An OSPF router that introduces routes external to its OSPF domain.", "It can originate a Type 5 advertisement for an imported destination.", "areas"],
+["Point-to-point link", "An OSPF link connecting two routers directly.", "Each endpoint describes the connection in its Router LSA.", "areas"],
+["Transit network", "An OSPF network that traffic can traverse between participating routers.", "A shared LAN connecting R1, R2, and R3 can be drawn as a network node.", "areas"],
+["Stub network", "An OSPF network reached through a single attached router in the teaching topology.", "It is represented in the attached router’s Router LSA. This use of stub is distinct from an OSPF stub area.", "areas"],
+["Virtual link", "A logical OSPF backbone connection configured through a transit area.", "It can provide a logical backbone connection where an ABR lacks a direct physical one.", "areas"],
+["Designated Router (DR)", "The elected router representing a shared multiaccess network in OSPF.", "It originates the Type 2 Network LSA. Election considers interface priority and then router ID, with incumbents retained under normal election behavior.", "areas"],
+["Backup Designated Router (BDR)", "An elected standby for the DR on a shared segment.", "If the DR fails, the BDR can assume its role.", "areas"],
+["Hello", "OSPF Type 1 packet for discovering and maintaining neighbors.", "A router lists neighbor router IDs it has heard from so two-way communication can be recognized.", "ospf"],
+["Database Description (DBD)", "OSPF Type 2 packet that summarizes the LSDB using LSA headers.", "The peer compares these entries with its own copies.", "ospf"],
+["Link State Request (LSR)", "OSPF Type 3 packet that asks for specific advertisements.", "The request identifies an LSA using type, Link State ID and Advertising Router.", "ospf"],
+["Link State Update (LSU)", "OSPF Type 4 packet carrying one or more complete LSAs.", "It can answer a request or carry changed advertisements during flooding.", "ospf"],
+["Link State Acknowledgment (LSAck)", "OSPF Type 5 packet acknowledging receipt using LSA headers.", "Acknowledgment helps peers provide reliable flooding.", "ospf"],
+["OSPF common header", "A 24-byte OSPFv2 header shared by the five packet types.", "Version, type, length, router and area IDs, checksum, and authentication fields describe the packet.", "ospf"],
+["Link State Advertisement (LSA)", "A piece of topology or reachability information that OSPF stores and distributes.", "An LSU may carry multiple LSAs, and each LSA can contain multiple records.", "lsa"],
+["LSA header", "The 20-byte header that identifies and versions an OSPFv2 advertisement.", "Age, options, type, Link State ID, Advertising Router, sequence, checksum and length describe the LSA.", "lsa"],
+["Router LSA (Type 1)", "An area-local advertisement each router originates to describe its links.", "Its body can list link ID, link data, type and cost for each link.", "lsa"],
+["Network LSA (Type 2)", "An area-local advertisement a DR originates for a transit multiaccess network.", "The body contains the network mask and IDs of attached routers.", "lsa"],
+["Summary Link to Network (Type 3)", "An ABR advertisement describing reachability to a network in another area.", "A router can learn an inter-area prefix without learning every internal link of the other area.", "lsa"],
+["Summary Link to ASBR (Type 4)", "An ABR advertisement describing how to reach an ASBR in another area.", "It can supply the path to the router that originated an external advertisement.", "lsa"],
+["External Link LSA (Type 5)", "An ASBR advertisement describing a destination external to OSPF.", "The advertisement carries the external prefix and metric information.", "lsa"],
+["Link ID and Link Data", "Fields in a Type 1 Router LSA link record whose meaning depends on the link type.", "For a stub link they describe the network and its mask. For an unnumbered point-to-point link they can describe the neighbor ID and local interface index.", "lsa"],
+["Type of Service (TOS) metric", "The optional legacy metric fields shown in the slide’s Router LSA format.", "Use the base link metric for the slide’s worked example.", "lsa"],
+["Path vector", "A routing approach that exchanges destination reachability together with path information.", "BGP’s AS_PATH tells a peer which ASes the advertisement has traversed.", "bgp"],
+["Border Gateway Protocol (BGP)", "A policy-based path-vector protocol for exchanging IP prefix reachability.", "Peers establish a TCP session on port 179.", "bgp"],
+["BGP speaker", "A router operating a BGP session with another peer.", "It learns, selects and advertises paths according to policy.", "bgp"],
+["Stub AS", "An AS with one connection to another AS in the slide classification.", "It originates or receives its own traffic.", "bgp"],
+["Multihomed AS", "An AS with multiple external connections.", "In the slides’ nontransit example, those links provide alternatives for its own traffic.", "bgp"],
+["Transit AS", "An AS that carries traffic between other ASes.", "A provider can carry traffic entering from one AS and exiting toward another.", "bgp"],
+["eBGP", "A BGP session between speakers in different autonomous systems.", "It exchanges routes across an AS boundary.", "bgp"],
+["iBGP", "A BGP session between speakers inside the same AS.", "It distributes BGP reachability within the AS.", "bgp"],
+["Path attributes", "Properties accompanying BGP routes that describe a path or support policy.", "ORIGIN, AS_PATH and NEXT_HOP are well-known mandatory attributes when advertising conventional IPv4 unicast NLRI.", "bgp"],
+["Well-known attribute", "A BGP attribute recognized by all BGP implementations.", "It can be mandatory or discretionary.", "bgp"],
+["Optional attribute", "An attribute whose recognition is not required of all BGP implementations.", "Its transitive flag governs handling when a speaker does not recognize it.", "bgp"],
+["AS_PATH", "The BGP attribute describing the AS sequence or sets associated with a route.", "A receiver can reject a route containing its own AS to prevent an AS-level loop.", "bgp"],
+["NEXT_HOP", "A BGP path attribute specifying the next-hop IP for the advertised reachability.", "The router must be able to reach that IP for the path to be usable.", "bgp"],
+["ORIGIN", "A BGP attribute indicating the origin category for the routing information.", "The standard values are IGP, EGP, and INCOMPLETE.", "bgp"],
+["Network Layer Reachability Information (NLRI)", "The destination prefixes announced in a BGP UPDATE.", "A peer can learn reachability to 203.0.113.0/24.", "bgp"],
+["BGP common header", "A 19-byte header containing marker, length and message type.", "The type determines whether the receiver parses OPEN, UPDATE, NOTIFICATION or KEEPALIVE in the slide’s base set.", "bgp"],
+["OPEN", "A BGP message that establishes and negotiates the session after TCP connects.", "It carries session information such as the AS, hold time and BGP identifier.", "bgp"],
+["UPDATE", "A BGP message that withdraws or advertises reachability and carries applicable path attributes.", "A router can withdraw a prefix when it can no longer advertise that path.", "bgp"],
+["NOTIFICATION", "A BGP message reporting an error before the session closes.", "It provides an error code and can include supporting detail.", "bgp"],
+["KEEPALIVE", "A BGP message confirming the OPEN or maintaining an established session.", "It contains only the common BGP header.", "bgp"]
+];
 const conceptInfo={
  Encapsulation:['A layer wraps the payload with its own header. At this hop, Ethernet carries the IP datagram and adds the local MAC addresses.','encap'],
  Decapsulation:['A receiving layer removes its wrapper and passes the payload to the next layer.','encap'],
@@ -480,6 +676,58 @@ function activeLesson(){
  }
  return {encap:branch?'destination':'sender',forward:'forward',arp:'arp',switch:'switching'}[mode]||'scope';
 }
+const glossary=$('definitions-dialog');
+const defSearch=$('definition-search');
+const defGroup=$('definition-group');
+const defContext=$('definition-context');
+const orderedDefinitions=[...definitions].sort((a,b)=>a[0].localeCompare(b[0]));
+for(const group of new Set(Object.values(lessons).map(item=>item.group))){
+ const choice=make('option',group);
+ choice.value=group;defGroup.append(choice);
+}
+let stageOnly=false;
+function renderDefinitions(selectedTerm=''){
+ const search=defSearch.value.trim().toLowerCase().split(/\s+/).filter(Boolean);
+ const key=stageOnly?activeLesson():'';
+ const matches=orderedDefinitions.filter(([term,definition,context,id])=>{
+  if(key&&id!==key)return false;
+  if(defGroup.value&&lessons[id].group!==defGroup.value)return false;
+  const words=[term,definition,context,lessons[id].group].join(' ').toLowerCase();
+  return search.every(word=>words.includes(word));
+ });
+ const list=$('definition-list');
+ const rows=matches.map(([term,definition,context,id])=>{
+  const item=make('details',undefined,'definition-item');
+  item.open=term===selectedTerm||matches.length===1;
+  const usage=make('p',context);
+  usage.prepend(make('span','In the network','label'));
+  const source=make('small',lessons[id].slides,'lesson-ref');
+  const link=button('Open lesson',()=>{glossary.close();openLesson(id,$('definitions-button'));});
+  item.append(make('summary',term),make('p',definition),usage,source,link);
+  return item;
+ });
+ list.replaceChildren(...(rows.length?rows:[make('p','No terms found. Try a different search or topic.','muted')]));
+ $('def-status').textContent=matches.length+' of '+definitions.length+' terms';
+ defContext.setAttribute('aria-pressed',String(stageOnly));
+}
+function showDefinitions(term=''){
+ stageOnly=false;defSearch.value=term;defGroup.value='';
+ renderDefinitions(term);
+ if(!glossary.open)glossary.showModal();
+ glossary.scrollTop=0;
+ if(term){
+  const match=$('definition-list').querySelector('details[open]');
+  if(match)match.querySelector('summary').focus({preventScroll:true});
+ }else defSearch.focus();
+}
+$('definitions-button').onclick=()=>showDefinitions();
+defSearch.oninput=()=>renderDefinitions();
+defGroup.onchange=()=>{stageOnly=false;renderDefinitions();};
+defContext.onclick=()=>{
+ stageOnly=!stageOnly;
+ defGroup.value='';defSearch.value='';renderDefinitions();
+};
+
 let lessonTrigger=null;
 function openLesson(id,trigger){
  const item=lessons[id];
@@ -506,6 +754,12 @@ function openLesson(id,trigger){
   }
   figure.append(peers,make('div','N2 · Shared transit LAN','topology-lan'));
   body.append(figure);
+ }
+ const keywords=definitions.filter(term=>term[3]===id);
+ if(keywords.length){
+  const list=make('div',undefined,'keyword-list');
+  for(const [term] of keywords)list.append(button(term,()=>showDefinitions(term)));
+  body.append(make('div','Definitions & keywords','label'),list);
  }
  body.append(make('div','Questions to check','label'));
  for(const [q,a] of item.questions){
@@ -680,14 +934,20 @@ function box(x,y,w,h,r,fill,stroke){
  ctx.beginPath();ctx.roundRect(x,y,w,h,r);ctx.fillStyle=fill;ctx.fill();
  if(stroke){ctx.strokeStyle=stroke;ctx.lineWidth=1;ctx.stroke();}
 }
-function label(text,x,y,color='#acaeb1',size=11,align='center'){
- ctx.textAlign=align;ctx.textBaseline='middle';ctx.font=size+'px monospace';ctx.fillStyle=color;ctx.fillText(text,x,y);
+function label(text,x,y,color='#aeaeae',size=11,align='center',maxWidth){
+ ctx.textAlign=align;ctx.textBaseline='middle';ctx.font=size+'px monospace';ctx.fillStyle=color;if(maxWidth!==undefined)ctx.fillText(text,x,y,maxWidth);else ctx.fillText(text,x,y);
 }
-function token(x,y,text,color='#4a5c74',primary=false){
+function tile(x,y,width,height,title,detail,active){
+ box(x-width/2,y-height/2,width,height,5,active?'#303030':'#191919',active?'#909090':'#525252');
+ const compact=width<120;
+ label(title,x,y-8,active?'#f4f4f4':'#dedede',compact?11:13,'center',width-18);
+ label(detail,x,y+9,'#b5b5b5',compact?9:11,'center',width-18);
+}
+function token(x,y,text,color='#5b5b5b',primary=false){
  ctx.font='12px monospace';const width=ctx.measureText(text).width+21;
- ctx.shadowBlur=primary?15:0;ctx.shadowColor='#354760';
- box(x-width/2,y-13,width,26,3,'#1b222d',color);
- ctx.shadowBlur=0;label(text,x,y,'#f1f3f6',12);
+ ctx.shadowBlur=primary?15:0;ctx.shadowColor='#464646';
+ box(x-width/2,y-13,width,26,3,'#222222',color);
+ ctx.shadowBlur=0;label(text,x,y,'#f3f3f3',12);
  if(primary){
   packetLocation=[x,y];
   for(const el of hitButtons.values()){
@@ -712,56 +972,44 @@ function draw(){
  if(world&&p)xfocus=world[p.from][0]+(world[p.to][0]-world[p.from][0])*frac;
  const drift=Math.sin(position*.85)*Math.min(w*.12,120);
  const cam=xfocus*zoom-drift+position*8;
- ctx.fillStyle='#2a3444';
+ ctx.fillStyle='#343434';
  for(let x=(36-cam*.26%36)%36;x<w;x+=36)for(let y=26;y<h;y+=36)ctx.fillRect(x,y,1,1);
- ctx.strokeStyle='#131821';ctx.lineWidth=1;
+ ctx.strokeStyle='#181818';ctx.lineWidth=1;
  for(let x=(144-cam*.51%144)%144;x<w;x+=144){ctx.beginPath();ctx.moveTo(x,0);ctx.lineTo(x,h);ctx.stroke();}
  if(mode==='encap'){
   const x=w*.46,ytop=128,gap=Math.min(44,Math.max(22,(h-210)/7)),width=Math.min(w-34,270);
   [...layerNames].reverse().forEach((name,n)=>{
    const y=ytop+n*gap;
-   box(x-width/2,y,width,gap-4,3,n===6-layer?'#1b222d':'#0d0f13','#2a3444');
-   label('L'+(7-n)+' '+name,x,y+(gap-4)/2);
+   box(x-width/2,y,width,gap-4,3,n===6-layer?'#222222':'#0f0f0f','#343434');
+   label('L'+(7-n)+' '+name,x,y+(gap-4)/2,'#d6d6d6',11,'center',width-16);
    hotspot('osi-'+n,'Explain '+name,n===4?'forward':n===5?'ingress':branch?'destination':'sender',x,y+(gap-4)/2,width,gap-4);
   });
   const n=6-layer+(branch?-frac:frac)*.74;
-  token(x+width/2-30,ytop+n*gap+gap/2,'PDU','#4a5c74',true);return;
+  token(x+width/2-30,ytop+n*gap+gap/2,'PDU','#5b5b5b',true);return;
  }
  if(routed){
   const offset=w*.4+drift-xfocus*zoom,pt=n=>[rnodes[n][0]*zoom+offset,mid+rnodes[n][1]*zoom];
   const left=pt('I')[0]-110*zoom,right=pt('O')[0]+110*zoom;
-  box(left,mid-109,right-left,218,4,'#101319','#2a3444');
-  label('R1 / NETWORK PLANE',left+15,mid-91,'#afb1b4',11,'left');
-  label('INGRESS',left+16,mid+88,'#4a5c74',10,'left');
-  label('EGRESS',right-16,mid+88,'#4a5c74',10,'right');
+  box(left,mid-109,right-left,218,4,'#131313','#343434');
+  label('R1 / NETWORK PLANE',left+15,mid-91,'#b1b1b1',11,'left');
+  label('INGRESS',left+16,mid+88,'#5b5b5b',10,'left');
+  label('EGRESS',right-16,mid+88,'#5b5b5b',10,'right');
   const chain=['A','I','V','F','H','N','M','O','R2','B'];
-  chain.slice(1).forEach((n,i)=>line(pt(chain[i]),pt(n),'#2a3444',2));
-  [['V','Drop'],['M','Frag'],['Frag','O'],['M','ICMP']].forEach(([a,b])=>line(pt(a),pt(b),'#2a3444'));
+  chain.slice(1).forEach((n,i)=>line(pt(chain[i]),pt(n),'#343434',2));
+  [['V','Drop'],['M','Frag'],['Frag','O'],['M','ICMP']].forEach(([a,b])=>line(pt(a),pt(b),'#343434'));
   [['F','Routing table','DA → NA'],['N','ARP table','NA → MAC'],['M','MTU table','eth1 → 1280 B']].forEach(([n,name,detail])=>{
    const [x,y]=pt(n),dy=n==='M'?54:-57,sy=y+dy;
-   line([x,y],[x,sy],'#354760');
-   box(x-59,sy-18,118,36,3,'#131821','#354760');
-   hotspot('table-'+n,name,n==='N'?'arp-cache':nodeLessons[n],x,sy,118,36);
-   label(name,x,sy-6,'#d9dbde',10);label(detail,x,sy+8,'#a3a5a8',10);
+   line([x,y],[x,sy],'#464646');
+   tile(x,sy,116,37,name,detail,false);
+   hotspot('table-'+n,name,n==='N'?'arp-cache':nodeLessons[n],x,sy,116,37);
   });
-  st.paths.forEach(path=>line(pt(path.from),pt(path.to),'#4a5c74',2.5));
+  st.paths.forEach(path=>line(pt(path.from),pt(path.to),'#5b5b5b',2.5));
   for(const [n,value] of Object.entries(rnodes)){
    const [x,y]=pt(n),active=p&&(n===p.from||n===p.to);
    if(x<-170||x>w+170)continue;
-   hotspot('node-'+n,'Explain '+value[2],nodeLessons[n],x,y,Math.min(145*zoom,147),40);
-   const host=['A','B','R2'].includes(n);
-   if(host){
-    ctx.beginPath();ctx.ellipse(x,y-13,26,13,0,0,Math.PI*2);
-    ctx.fillStyle=active?'#2a3444':'#131821';ctx.fill();ctx.strokeStyle='#97999c';ctx.stroke();
-    if(n==='R2'){line([x-12,y-17],[x+12,y-9],'#e0e2e5',2);line([x-12,y-9],[x+12,y-17],'#e0e2e5',2);}
-    else label(n,x,y-13,'#e7e9ec');
-    label(value[2],x,y+18,'#dddfe2');label(value[3],x,y+34,'#9c9ea1',10);
-   }else{
-    box(x-72*zoom,y-20,144*zoom,40,4,active?'#1b222d':'#131821',active?'#4a5c74':'#354760');
-    label(value[2],x,y-6,active?'#f1f3f6':'#bec0c3',w<620?9:11);
-    label(value[3],x,y+8,'#afb1b4',w<620?8:9);
-    label('+',x+64*zoom,y-13,'#b6b8bb',11);
-   }
+   const width=Math.round(169*zoom);
+   tile(x,y,width,46,value[2],value[3],active);
+   hotspot('node-'+n,'Explain '+value[2],nodeLessons[n],x,y,width,46);
   }
   st.paths.forEach((path,i)=>{
    const a=pt(path.from),b=pt(path.to),t=Math.max(0,(frac-path.delay)/(1-path.delay));
@@ -770,17 +1018,16 @@ function draw(){
   return;
  }
  const opt=current(),pt=n=>[nodes[n][0]*w,nodes[n][1]*h*.62+86];
- opt.links.forEach(([a,b])=>line(pt(a),pt(b),'#2a3444',2));
+ opt.links.forEach(([a,b])=>line(pt(a),pt(b),'#343434',2));
  st.paths.forEach(path=>line(pt(path.from),pt(path.to),path.color,2));
  opt.visible.forEach(n=>{
   const [x,y]=pt(n),active=st.paths.some(path=>path.from===n||path.to===n);
-  box(x-21,y-15,42,30,3,active?'#1b222d':'#101319','#354760');
-  label(n==='ALT'?'R3':n,x,y,'#e0e2e5');
-  label(nodes[n][2],x,y+24);
-  hotspot('generic-'+n,'Explain '+nodes[n][2]+' in this lab',activeLesson(),x,y,48,33);
-  if(w>650)label(opt.aliases[n]??nodes[n][3],x,y+39,'#9a9c9f',9);
+  const width=Math.min(136,Math.max(60,w*.195));
+  const detail=opt.aliases[n]??nodes[n][3];
+  tile(x,y,width,44,nodes[n][2],detail,active);
+  hotspot('generic-'+n,'Explain '+nodes[n][2]+' in this lab',activeLesson(),x,y,width,44);
  });
- if(!p){token(w*.4,mid+45,'PDU','#4a5c74',true);return;}
+ if(!p){token(w*.4,mid+45,'PDU','#5b5b5b',true);return;}
  st.paths.forEach((path,i)=>{
   const a=pt(path.from),b=pt(path.to),t=Math.max(0,(frac-path.delay)/(1-path.delay));
   token(a[0]+(b[0]-a[0])*t,a[1]+(b[1]-a[1])*t-28,path.label,path.color,i===0);
