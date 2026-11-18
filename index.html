@@ -2,79 +2,94 @@
 <html lang="en">
 <head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="description" content="Follow a packet through the OSI model and experiment with network-layer protocols."><title>NetworkTrain — Packet Lab</title>
 <style>
-:root{color-scheme:dark;--bg:#080c15;--panel:#101826;--line:#26354b;--ink:#f1f6ff;--muted:#a0b1c9;--blue:#59a9ff;--cyan:#65e1ed}*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--ink);font:15px/1.5 system-ui,sans-serif}button,select,input{font:inherit}button,select{color:inherit;background:#151f31;border:1px solid var(--line);border-radius:8px;padding:8px 12px;cursor:pointer}button:hover,select:hover{border-color:var(--blue)}button:focus-visible,select:focus-visible,input:focus-visible{outline:2px solid var(--cyan);outline-offset:3px}button:disabled{opacity:.42;cursor:default}button[aria-pressed=true],.primary{background:#17478a;border-color:#438efd}header{display:flex;gap:28px;align-items:center;padding:16px 24px;border-bottom:1px solid var(--line);background:#0d1421;flex-wrap:wrap}.brand{font-size:21px;font-weight:800;letter-spacing:-.6px;white-space:nowrap}.brand b{color:var(--blue);margin-right:10px}.toolbar,.controls,.branches,.pills{display:flex;align-items:center;gap:8px;flex-wrap:wrap}.toolbar button{padding:7px 10px}.layout{display:grid;grid-template-columns:204px minmax(0,1fr) 312px;max-width:1700px;margin:auto;min-height:85vh}aside{padding:24px 16px;border-right:1px solid var(--line)}aside.inspector{border-right:0;border-left:1px solid var(--line)}main{padding:26px;min-width:0}h1,h2,h3,p{margin:0}h1{font-size:clamp(24px,3vw,38px);line-height:1.16;letter-spacing:-1px}h2{font-size:18px}h3{font-size:15px}small,.muted{color:var(--muted)}.label{font:700 11px/1.5 ui-monospace,monospace;letter-spacing:.12em;text-transform:uppercase;color:var(--blue)}.layers{display:grid;gap:7px;margin:12px 0 18px}.layer{display:flex;text-align:left;align-items:center;gap:9px}.layer span{font:12px ui-monospace;color:var(--blue)}.layer[aria-pressed=true]{box-shadow:inset 3px 0 var(--cyan)}.directions{display:grid;gap:7px}.intro{margin:7px 0 18px}.stage{border:1px solid var(--line);border-radius:14px;overflow:hidden;background:#0d1626}.stage-heading{padding:15px 17px;border-bottom:1px solid var(--line);display:flex;justify-content:space-between;gap:12px;align-items:center}.live{color:var(--cyan);white-space:nowrap}.stage canvas{display:block;width:100%;height:300px;background:radial-gradient(ellipse at 50% 55%,#142949,#0b1424 75%)}.controls{padding:12px;border-top:1px solid var(--line)}.controls input{flex:1;min-width:95px;accent-color:var(--blue)}.branches{margin:12px 0}.branches .label{width:100%}.cards{display:grid;grid-template-columns:repeat(auto-fit,minmax(155px,1fr));gap:9px;margin-top:14px}.card,details{background:var(--panel);border:1px solid var(--line);border-radius:9px;padding:11px}.card p{color:var(--muted);margin-top:3px;font-size:13px}.inspector h2{margin:7px 0 8px}.inspector p{font-size:14px;color:var(--muted)}.stack{display:flex;flex-wrap:wrap;gap:5px;margin:16px 0}.stack span{background:#15355e;border:1px solid #30578c;padding:5px 7px;border-radius:5px;font:12px ui-monospace;color:#dbeaff}.fields{margin:14px 0 20px}.field{padding:8px 0;border-bottom:1px solid var(--line);display:grid;gap:2px}.field span{font-size:12px;color:var(--muted)}.field strong{font:13px ui-monospace;overflow-wrap:anywhere}.notes{margin-top:16px}.notes details{margin-top:7px}.notes summary{cursor:pointer;color:#cee4ff}.notes p{color:var(--muted);margin-top:8px}dialog{max-width:620px;width:calc(100% - 28px);background:#101826;color:var(--ink);border:1px solid var(--line);border-radius:12px;padding:22px}dialog::backdrop{background:#04070ccc}.dialog-top{display:flex;justify-content:space-between;align-items:center;gap:12px;margin-bottom:12px}.source-list li{margin:7px 0}.tools-end{margin-left:auto}@media(max-width:1050px){.layout{grid-template-columns:166px minmax(0,1fr)}aside.inspector{grid-column:2;border-left:0;border-top:1px solid var(--line);padding:20px 26px}main{padding:20px}.stage canvas{height:280px}}@media(max-width:650px){header{padding:12px;gap:9px}.layout{display:block}aside,main,aside.inspector{padding:12px}.layout>aside:first-child{border-bottom:1px solid var(--line);border-right:0}.layers{display:flex;overflow:auto;margin:7px 0}.layer{white-space:nowrap}.directions{display:flex;flex-wrap:wrap}.stage canvas{height:250px}.stage-heading{align-items:flex-start}.tools-end{margin-left:0}}
+:root{color-scheme:dark;--bg:#0d0f13;--panel:#131821;--line:#2a3444;--ink:#f1f3f6;--muted:#b0b2b5;--blue:#a4a6a9;--cyan:#c6c8cb}*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--ink);font:15px/1.5 system-ui,sans-serif}button,select,input{font:inherit}button,select{color:inherit;background:#131821;border:1px solid var(--line);border-radius:8px;padding:8px 12px;cursor:pointer}button:hover,select:hover{border-color:var(--blue)}button:focus-visible,select:focus-visible,input:focus-visible{outline:2px solid var(--cyan);outline-offset:3px}button:disabled{opacity:.42;cursor:default}button[aria-pressed=true],.primary{background:#2a3444;border-color:#4a5c74}header{display:flex;gap:28px;align-items:center;padding:16px 24px;border-bottom:1px solid var(--line);background:#101319;flex-wrap:wrap}.brand{font-size:21px;font-weight:800;letter-spacing:-.6px;white-space:nowrap}.brand b{color:var(--blue);margin-right:10px}.toolbar,.controls,.branches,.pills{display:flex;align-items:center;gap:8px;flex-wrap:wrap}.toolbar button{padding:7px 10px}.layout{display:grid;grid-template-columns:204px minmax(0,1fr) 312px;max-width:1700px;margin:auto;min-height:85vh}aside{padding:24px 16px;border-right:1px solid var(--line)}aside.inspector{border-right:0;border-left:1px solid var(--line)}main{padding:26px;min-width:0}h1,h2,h3,p{margin:0}h1{font-size:clamp(24px,3vw,38px);line-height:1.16;letter-spacing:-1px}h2{font-size:18px}h3{font-size:15px}small,.muted{color:var(--muted)}.label{font:700 11px/1.5 ui-monospace,monospace;letter-spacing:.12em;text-transform:uppercase;color:var(--blue)}.layers{display:grid;gap:7px;margin:12px 0 18px}.layer{display:flex;text-align:left;align-items:center;gap:9px}.layer span{font:12px ui-monospace;color:var(--blue)}.layer[aria-pressed=true]{box-shadow:inset 3px 0 var(--cyan)}.directions{display:grid;gap:7px}.intro{margin:7px 0 18px}.stage{border:1px solid var(--line);border-radius:14px;overflow:hidden;background:#101319}.stage-heading{padding:15px 17px;border-bottom:1px solid var(--line);display:flex;justify-content:space-between;gap:12px;align-items:center}.live{color:var(--cyan);white-space:nowrap}.stage canvas{display:block;width:100%;height:300px;background:radial-gradient(ellipse at 50% 55%,#1b222d,#101319 75%)}.controls{padding:12px;border-top:1px solid var(--line)}.controls input{flex:1;min-width:95px;accent-color:var(--blue)}.branches{margin:12px 0}.branches .label{width:100%}.cards{display:grid;grid-template-columns:repeat(auto-fit,minmax(155px,1fr));gap:9px;margin-top:14px}.card,details{background:var(--panel);border:1px solid var(--line);border-radius:9px;padding:11px}.card p{color:var(--muted);margin-top:3px;font-size:13px}.inspector h2{margin:7px 0 8px}.inspector p{font-size:14px;color:var(--muted)}.stack{display:flex;flex-wrap:wrap;gap:5px;margin:16px 0}.stack span{background:#2a3444;border:1px solid #354760;padding:5px 7px;border-radius:5px;font:12px ui-monospace;color:#e9ebee}.fields{margin:14px 0 20px}.field{padding:8px 0;border-bottom:1px solid var(--line);display:grid;gap:2px}.field span{font-size:12px;color:var(--muted)}.field strong{font:13px ui-monospace;overflow-wrap:anywhere}.notes{margin-top:16px}.notes details{margin-top:7px}.notes summary{cursor:pointer;color:#e3e5e8}.notes p{color:var(--muted);margin-top:8px}dialog{max-width:620px;width:calc(100% - 28px);background:#131821;color:var(--ink);border:1px solid var(--line);border-radius:12px;padding:22px}dialog::backdrop{background:#08090bcc}.dialog-top{display:flex;justify-content:space-between;align-items:center;gap:12px;margin-bottom:12px}.source-list li{margin:7px 0}.tools-end{margin-left:auto}@media(max-width:1050px){.layout{grid-template-columns:166px minmax(0,1fr)}aside.inspector{grid-column:2;border-left:0;border-top:1px solid var(--line);padding:20px 26px}main{padding:20px}.stage canvas{height:280px}}@media(max-width:650px){header{padding:12px;gap:9px}.layout{display:block}aside,main,aside.inspector{padding:12px}.layout>aside:first-child{border-bottom:1px solid var(--line);border-right:0}.layers{display:flex;overflow:auto;margin:7px 0}.layer{white-space:nowrap}.directions{display:flex;flex-wrap:wrap}.stage canvas{height:250px}.stage-heading{align-items:flex-start}.tools-end{margin-left:0}}
 </style>
 <style>
-:root{--bg:#030509;--panel:#080e19;--line:#203247;--ink:#e3edf9;--muted:#94a9c0;--blue:#68aaff;--cyan:#77d6ff;--top:64px}
+:root{--bg:#08090b;--panel:#0d0f13;--line:#2a3444;--ink:#eceef1;--muted:#a7a9ac;--blue:#a8aaad;--cyan:#c6c8cb;--top:64px}
 body{overflow-anchor:none;font-family:ui-monospace,SFMono-Regular,Consolas,"Liberation Mono",monospace;overscroll-behavior:none}
-header{position:fixed;inset:0 0 auto;z-index:5;min-height:64px;padding:10px 22px;background:#050a13f7;gap:17px;flex-wrap:nowrap}
+header{position:fixed;inset:0 0 auto;z-index:5;min-height:64px;padding:10px 22px;background:#0d0f13f7;gap:17px;flex-wrap:nowrap}
 .brand{font-weight:700;font-size:17px;letter-spacing:-.06em}.brand b{font-size:18px}
 .toolbar{flex:1;min-width:0;flex-wrap:nowrap;overflow-x:auto;scrollbar-width:thin}
-button,select{border-radius:3px;background:#0b1422;padding:7px 9px;font-size:12px}
+button,select{border-radius:3px;background:#101319;padding:7px 9px;font-size:12px}
 .tools-end{white-space:nowrap}
-#concept-pop{position:fixed;top:calc(var(--top) + 8px);left:min(16vw,210px);z-index:8;width:min(430px,calc(100vw - 30px));padding:14px;background:#0a1423;border:1px solid #376193;box-shadow:0 10px 40px #000b}
+#concept-pop{position:fixed;top:calc(var(--top) + 8px);left:min(16vw,210px);z-index:8;width:min(430px,calc(100vw - 30px));padding:14px;background:#101319;border:1px solid #354760;box-shadow:0 10px 40px #000b}
 #concept-pop p{font-size:12px;color:var(--muted);margin-top:6px}
 #concept-pop[hidden]{display:none}
-.layout{position:fixed;top:var(--top);left:0;right:0;height:calc(100svh - var(--top));min-height:0;display:grid;grid-template-columns:142px minmax(0,1fr);max-width:none;background:#030509}
-.layout>aside:first-child{z-index:2;background:#070c16;border-color:#162336;padding:18px 10px}
-.layer{gap:6px;width:100%;font-size:11px;padding:9px 6px}.layer[aria-pressed=true]{background:#0d233e}.layer span{font-size:10px}
+.layout{position:fixed;top:var(--top);left:0;right:0;height:calc(100svh - var(--top));min-height:0;display:grid;grid-template-columns:142px minmax(0,1fr);max-width:none;background:#08090b}
+.layout>aside:first-child{z-index:2;background:#0d0f13;border-color:#1b222d;padding:18px 10px}
+.layer{gap:6px;width:100%;font-size:11px;padding:9px 6px}.layer[aria-pressed=true]{background:#1b222d}.layer span{font-size:10px}
 main{position:relative;padding:0;overflow:hidden;height:100%}
-.stage{position:absolute;inset:0;border:0;border-radius:0;background:#030509;overflow:hidden}
-.stage canvas{width:100%;height:100%;background:#030509;touch-action:none;cursor:grab}.stage canvas:active{cursor:grabbing}
-.stage-heading{position:absolute;z-index:2;top:88px;left:22px;right:22px;padding:0;border:0;pointer-events:none}.stage-heading h2{font-size:14px;color:#a9cfff}.stage-heading small{letter-spacing:.08em}
+.stage{position:absolute;inset:0;border:0;border-radius:0;background:#08090b;overflow:hidden}
+.stage canvas{width:100%;height:100%;background:#08090b;touch-action:none;cursor:grab}.stage canvas:active{cursor:grabbing}
+.stage-heading{position:absolute;z-index:2;top:88px;left:22px;right:22px;padding:0;border:0;pointer-events:none}.stage-heading h2{font-size:14px;color:#cdcfd2}.stage-heading small{letter-spacing:.08em}
 .overlay{position:absolute;z-index:2;pointer-events:none;top:14px;left:22px;right:22px}.overlay>*{pointer-events:auto;width:max-content;max-width:100%}
 .overlay h1{font-family:inherit;font-size:clamp(22px,3vw,34px);letter-spacing:-.07em;margin:2px 0 0}.overlay .intro{display:none}.overlay .branches{margin-top:4px;gap:5px}.branches .label{display:none}
-.controls{position:absolute;bottom:9px;left:20px;right:20px;z-index:3;background:#08111dec;border:1px solid var(--line);padding:6px 9px;border-radius:4px}.controls input{min-width:30px}.controls small{font-size:11px}
-.cards{position:absolute;z-index:2;bottom:55px;left:20px;right:300px;display:flex;gap:6px;flex-wrap:wrap;pointer-events:none}.card{max-width:260px;border-radius:3px;background:#08111ded;padding:7px 9px}.card h3{font-size:11px;color:#a8ccff}.card p{font-size:11px}
-aside.inspector{position:absolute;bottom:56px;right:20px;z-index:3;width:260px;max-height:36%;overflow:auto;background:#08111df5;border:1px solid var(--line);border-radius:4px;padding:10px;overscroll-behavior:contain}.inspector h2{font-size:13px}.inspector p{font-size:11px}.stack{margin:8px 0 3px}.stack span{font-size:10px;padding:2px 4px}.fields{margin:4px 0}.field{display:flex;justify-content:space-between;gap:8px;padding:4px 0}.field span,.field strong{font-size:10px}.field strong{text-align:right}
+.controls{position:absolute;bottom:9px;left:20px;right:20px;z-index:3;background:#101319ec;border:1px solid var(--line);padding:6px 9px;border-radius:4px}.controls input{min-width:30px}.controls small{font-size:11px}
+.cards{position:absolute;z-index:2;bottom:55px;left:20px;right:300px;display:flex;gap:6px;flex-wrap:wrap;pointer-events:none}.card{max-width:260px;border-radius:3px;background:#101319ed;padding:7px 9px}.card h3{font-size:11px;color:#cbcdd0}.card p{font-size:11px}
+aside.inspector{position:absolute;bottom:56px;right:20px;z-index:3;width:260px;max-height:36%;overflow:auto;background:#101319f5;border:1px solid var(--line);border-radius:4px;padding:10px;overscroll-behavior:contain}.inspector h2{font-size:13px}.inspector p{font-size:11px}.stack{margin:8px 0 3px}.stack span{font-size:10px;padding:2px 4px}.fields{margin:4px 0}.field{display:flex;justify-content:space-between;gap:8px;padding:4px 0}.field span,.field strong{font-size:10px}.field strong{text-align:right}
 #rail{padding-top:var(--top)}#map-stages{display:grid;gap:5px;margin-top:14px}#map-stages button{text-align:left}#map-stages span{display:block;color:var(--muted);margin-top:2px}
-dialog{border-radius:4px}a{color:#85baff}#notes details{margin-top:6px}#notes summary{cursor:pointer}
+dialog{border-radius:4px}a{color:#b8babd}#notes details{margin-top:6px}#notes summary{cursor:pointer}
 @media(max-width:760px){header{padding:7px 9px;gap:8px}.brand{font-size:13px}.brand b{margin-right:4px}.tools-end{display:none}.layout{grid-template-columns:1fr;grid-template-rows:auto minmax(0,1fr)}.layout>aside:first-child{padding:4px 7px;border-right:0;border-bottom:1px solid var(--line)}.layout>aside:first-child>.label{display:none}.layers{margin:0 0 4px;gap:4px}.layer{width:auto;padding:4px 6px}.directions{display:flex;gap:4px}.directions button{padding:3px 6px}.overlay,.stage-heading{left:9px;right:9px}.stage-heading{top:83px}.stage-heading h2{font-size:11px}.cards{display:none}.controls{left:8px;right:8px}.controls small{display:none}aside.inspector{right:8px;bottom:49px;width:min(270px,75vw);max-height:27%;padding:6px}.inspector h2{margin:2px 0}.overlay .branches button{padding:3px 5px;font-size:10px}#concept-pop{left:10px}}
 </style>
 <style>
-:root{--bg:#03060e;--panel:#080f20;--line:#242f50;--ink:#e6ebf7;--muted:#a0acca;--blue:#8095ca;--cyan:#899fcf}
+:root{--bg:#08090b;--panel:#101319;--line:#2a3444;--ink:#ebedf0;--muted:#aeb0b3;--blue:#989a9d;--cyan:#a1a3a6}
 body{font-family:Inter,"Segoe UI",system-ui,sans-serif}
-header{background:#070b17f8;border-color:#202942}
+header{background:#0d0f13f8;border-color:#1b222d}
 .brand{font-family:inherit;letter-spacing:-.045em;font-size:19px}
-.brand b,.layer span{color:#8296cc}
+.brand b,.layer span{color:#9a9c9f}
 .overlay h1{letter-spacing:-.055em;font-weight:700;font-size:clamp(25px,3vw,38px)}
 .label,.field strong,.layer span,.live{font-family:ui-monospace,SFMono-Regular,Consolas,monospace}
-.label{color:#8d9dc6}.live,.stage-heading h2{color:#aab9da}
-button,select{background:#10172a;border-color:#273354;font-weight:550}
-button[aria-pressed=true],.layer[aria-pressed=true]{background:#172752;border-color:#43558c;box-shadow:none}
+.label{color:#9fa1a4}.live,.stage-heading h2{color:#babcbf}
+button,select{background:#131821;border-color:#2a3444;font-weight:550}
+button[aria-pressed=true],.layer[aria-pressed=true]{background:#1b222d;border-color:#354760;box-shadow:none}
 .stage canvas,.stage canvas:active{cursor:default}
-.stage canvas{background:#03050d}
-.controls{background:#0a1020f5}.controls small{color:#bac5df}
-.controls input{accent-color:#536bac}
-.layout>aside:first-child{background:#080d1a}
-.card,.inspector{background:#0a1121f5!important}
-.card h3{color:#b5c6ea}
-.overlay>.intro{display:block;font-size:12px;margin:3px 0 4px;color:#9caac9;max-width:60ch}
+.stage canvas{background:#08090b}
+.controls{background:#101319f5}.controls small{color:#c6c8cb}
+.controls input{accent-color:#354760}
+.layout>aside:first-child{background:#0d0f13}
+.card,.inspector{background:#101319f5!important}
+.card h3{color:#c7c9cc}
+.overlay>.intro{display:block;font-size:12px;margin:3px 0 4px;color:#abadb0;max-width:60ch}
 .overlay>.intro:empty{display:none}
 .stage-heading{top:111px}
 #hit-layer{pointer-events:none;position:absolute;inset:0;z-index:1}
 .path-hit{position:absolute;pointer-events:auto;background:transparent;border:1px solid transparent;padding:0;cursor:default;border-radius:6px}
-.path-hit:hover,.path-hit:focus-visible{background:#25357025;border-color:#647db9}
+.path-hit:hover,.path-hit:focus-visible{background:#2a344425;border-color:#4a5c74}
 .packet-hit{background:transparent}
-#lesson-drawer{position:absolute;z-index:6;right:0;top:0;bottom:0;width:min(440px,95vw);background:#0a1020;border-left:1px solid #33436c;box-shadow:-16px 0 50px #000b;overflow:auto;overscroll-behavior:contain;padding:19px}
+#lesson-drawer{position:absolute;z-index:6;right:0;top:0;bottom:0;width:min(440px,95vw);background:#101319;border-left:1px solid #2a3444;box-shadow:-16px 0 50px #000b;overflow:auto;overscroll-behavior:contain;padding:19px}
 #lesson-drawer[hidden]{display:none}
 .drawer-head{display:flex;justify-content:space-between;align-items:start;gap:9px}
 .drawer-head h2{font-size:23px;letter-spacing:-.045em;line-height:1.12;margin:5px 0 7px}
-.drawer-body{font-size:14px;color:#c7d0e6}
+.drawer-body{font-size:14px;color:#d1d3d6}
 .drawer-body>p{margin:0 0 13px}.drawer-body>.label{margin:14px 0 5px}
 .lesson-flow{list-style:none;display:grid;gap:14px;margin:8px 0 15px;padding:0}
-.lesson-flow li{position:relative;padding:8px 11px;border:1px solid #354674;background:#111d3a;border-radius:4px;color:#dce5f8}
-.lesson-flow li+li::before{content:"↓";position:absolute;left:15px;top:-17px;color:#a0add2;font-family:monospace}
-.lesson-flow li[data-branch]{margin-left:20px;border-color:#475585;background:#141c37}
+.lesson-flow li{position:relative;padding:8px 11px;border:1px solid #2a3444;background:#131821;border-radius:4px;color:#e5e7ea}
+.lesson-flow li+li::before{content:"↓";position:absolute;left:15px;top:-17px;color:#afb1b4;font-family:monospace}
+.lesson-flow li[data-branch]{margin-left:20px;border-color:#354760;background:#131821}
 .lesson-flow li[data-branch]::before{content:"↳";left:-18px;top:5px}
-.lsa-topology{margin:14px 0;text-align:center}.topology-peers{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;padding-bottom:17px}.topology-peers>div{position:relative;background:#182447;border:1px solid #4b6196;border-radius:4px;padding:6px}.topology-peers small{display:block}.topology-peers>div::after{content:"";position:absolute;height:18px;width:1px;background:#7083b2;left:50%;top:100%}.topology-lan{background:#141f39;border-top:2px solid #7083b2;padding:6px}.lesson-example{padding:9px 11px;background:#111a31;border-left:2px solid #566dab}
+.lsa-topology{margin:14px 0;text-align:center}.topology-peers{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;padding-bottom:17px}.topology-peers>div{position:relative;background:#1b222d;border:1px solid #354760;border-radius:4px;padding:6px}.topology-peers small{display:block}.topology-peers>div::after{content:"";position:absolute;height:18px;width:1px;background:#4a5c74;left:50%;top:100%}.topology-lan{background:#1b222d;border-top:2px solid #4a5c74;padding:6px}.lesson-example{padding:9px 11px;background:#131821;border-left:2px solid #4a5c74}
 .drawer-body details{padding:7px 9px;margin-top:6px;border-radius:4px}
-.drawer-body details summary{cursor:pointer;color:#bfcfee;font-weight:590}
-.drawer-body details p{margin-top:7px;color:#c4cde0}
+.drawer-body details summary{cursor:pointer;color:#d0d2d5;font-weight:590}
+.drawer-body details p{margin-top:7px;color:#cdcfd2}
 .lesson-links{display:flex;gap:6px;flex-wrap:wrap;margin-top:10px}
-#lesson-index{margin:11px 0}.lesson-group{margin:10px 0}.lesson-group h3{color:#bccbef;margin-bottom:4px}.lesson-group button{margin:2px 3px 2px 0}
+#lesson-index{margin:11px 0}.lesson-group{margin:10px 0}.lesson-group h3{color:#cdcfd2;margin-bottom:4px}.lesson-group button{margin:2px 3px 2px 0}
 small.lesson-ref{display:block;font-size:11px;margin:7px 0 12px}
 @media(max-width:760px){.stage-heading{top:119px}.overlay>.intro{font-size:11px}.overlay h1{font-size:24px}.controls button{padding:4px 5px}.path-hit{border-radius:4px}#lesson-drawer{padding:12px}}
+</style>
+<style>
+:root{--bg:#090a0c;--panel:#14181e;--line:#30343b;--ink:#eceef0;--muted:#a4a8af;--blue:#a4a8af;--cyan:#c0c4c9}
+header{background:#101114;border-color:#2b2e34}
+.layout,.stage,.stage canvas{background:#090a0c}
+.layout>aside:first-child{background:#121418;border-color:#2b2e34}
+button,select{background:#191c21;border-color:#373c44}
+button:hover,select:hover{border-color:#777d87}
+button[aria-pressed=true],.layer[aria-pressed=true]{background:#132743;border-color:#344d6b;color:#eceef0;box-shadow:inset 2px 0 #59708b}
+.controls,.card,.inspector{background:#15171bf5!important;border-color:#33373e}
+.stack span{background:#17263b;border-color:#34465e;color:#d6d9dd}
+#lesson-drawer,#concept-pop,dialog{background:#14161a;border-color:#3a4049}
+.lesson-flow li,.topology-peers>div,.topology-lan{background:#14243a;border-color:#3a4c63}
+.lesson-flow li[data-branch],.lesson-example{background:#191d24;border-color:#4a515d}
+.path-hit:hover,.path-hit:focus-visible{background:#192e4c42;border-color:#63728a}
 </style></head>
 <body>
 <header><div class="brand"><b>⇄</b>NetworkTrain</div><nav class="toolbar" aria-label="Concepts at this point" id="toolbar"></nav><button class="tools-end" id="sources">Slide coverage</button></header>
@@ -103,7 +118,7 @@ const layerData=[
 const nodes={A:[.12,.48,'Host A','192.0.2.10'],R1:[.35,.48,'Router R1','192.0.2.1'],R2:[.65,.48,'Router R2','198.51.100.2'],B:[.88,.48,'Host B','203.0.113.20'],C:[.65,.82,'Host C','Local listener'],D:[.35,.82,'Host D','Local listener'],ALT:[.5,.17,'Router R3','Alternate path']};
 const packet=['Ethernet','IPv4','Transport','Data','FCS'];
 const step=(title,description,paths=[],operations=[],fields=[],stack=packet)=>({title,description,paths,operations,fields,stack});
-const send=(from,to,label='IPv4',color='#647fb5',delay=0)=>({from,to,label,color,delay});
+const send=(from,to,label='IPv4',color='#4a5c74',delay=0)=>({from,to,label,color,delay});
 const direct=[
  step('Compare the destination with the local subnet','Host A and Host B are on 192.0.2.0/24. Host A resolves Host B’s MAC from Host B’s IP.',[],[['Next-hop IP','192.0.2.20']],[['Destination IP','192.0.2.20'],['Network prefix','192.0.2.0/24']],['IPv4','Transport','Data']),
  step('Send directly across the LAN','The IPv4 and Ethernet destination both identify Host B. There is no IP router on this path.',[send('A','B')],[['Direct delivery','A switch may forward the frame within the LAN.']],[['Source IP','192.0.2.10'],['Destination IP','192.0.2.20'],['Destination MAC','Host B'],['TTL','64']])
@@ -135,8 +150,8 @@ lab('arp','ARP','Resolve an IPv4 next hop to a MAC address before transmitting t
  ...['Cache miss · gateway','Cache hit','Direct delivery'].map((label,i)=>{const target=i===2?'B':'R1';const ip=i===2?'192.0.2.20':'192.0.2.1';
  const lookup=step('Look up '+ip,i===1?'The cached MAC can be used immediately.':'The cache has no usable mapping. Host A must ask on the LAN.',[],[['ARP cache',i===1?'Hit':'Miss']],[['Target IP',ip]],['IPv4 datagram waiting']);
  return option(label,[lookup,...(i===1?[]:[
- step('Broadcast the ARP request','Devices on this LAN see the request. Only the owner of the target IP replies in this example.',lan.slice(1).map(n=>send('A',n,'ARP request','#ffcc72')),[['Sender','Host A includes its own IP and MAC.'],['Receivers','Check the target protocol address in parallel.']],[['Operation','1 · Request'],['Sender IP','192.0.2.10'],['Sender MAC','Host A MAC'],['Target IP',ip],['Target hardware address','Unknown, shown as zeros'],['Ethernet destination','ff:ff:ff:ff:ff:ff']],['Ethernet','ARP','FCS']),
- step('Return the ARP reply','The target replies to Host A, which saves the mapping in its cache.',[send(target,'A','ARP reply','#8195c2')],[['Cache','Install '+ip+' → '+target+' MAC.']],[['Operation','2 · Reply'],['Sender IP',ip],['Sender MAC',target+' MAC'],['Target IP','192.0.2.10'],['Ethernet destination','Host A MAC']],['Ethernet','ARP','FCS'])
+ step('Broadcast the ARP request','Devices on this LAN see the request. Only the owner of the target IP replies in this example.',lan.slice(1).map(n=>send('A',n,'ARP request','#c4c7cc')),[['Sender','Host A includes its own IP and MAC.'],['Receivers','Check the target protocol address in parallel.']],[['Operation','1 · Request'],['Sender IP','192.0.2.10'],['Sender MAC','Host A MAC'],['Target IP',ip],['Target hardware address','Unknown, shown as zeros'],['Ethernet destination','ff:ff:ff:ff:ff:ff']],['Ethernet','ARP','FCS']),
+ step('Return the ARP reply','The target replies to Host A, which saves the mapping in its cache.',[send(target,'A','ARP reply','#97999c')],[['Cache','Install '+ip+' → '+target+' MAC.']],[['Operation','2 · Reply'],['Sender IP',ip],['Sender MAC',target+' MAC'],['Target IP','192.0.2.10'],['Ethernet destination','Host A MAC']],['Ethernet','ARP','FCS'])
  ]),step('Release the waiting datagram','Host A now has a MAC for the local next hop.',[send('A',target)],[['Frame destination',target+' MAC']],[['IPv4 destination',i===2?ip:'203.0.113.20'],['Ethernet destination',target+' MAC']])],lan,lanLinks,lanAlias);})
 ],[['ARP packet format','Hardware Type 1 means Ethernet. Protocol Type 0x0800 means IPv4. Address lengths are 6 and 4 bytes. Operation 1 is request and 2 is reply. Ethernet identifies ARP with EtherType 0x0806.'],['Where to resolve','Host to local host, host to gateway, router to next router, or final router to destination host. Every resolution applies to the outgoing local network.'],['Proxy ARP','A proxy router can answer for another IP using its own MAC, then forward traffic onward.']]);
 const routes=[['203.0.113.128/26','R3','m2'],['203.0.113.128/25','R2','m1'],['0.0.0.0/0','R2','m1']];
@@ -151,29 +166,29 @@ lab('forward','IP forwarding','Choose an address and compare every matching rout
 const switchingNotes=[['Delay formulas','Transmission = L/R. Propagation = distance/speed. Add queueing and processing where specified. A store-and-forward packet across N equal links takes N × (transmission + propagation) before extra waiting.'],['Worked example','5,000 bits over a 1 Gbps link take 5 µs to transmit. With 10 µs propagation per link, two links take 30 µs and four links take 60 µs.'],['Circuit example','After setup, a bit stream can pipeline along the reserved circuit. Add setup, serialization of the message, and propagation across the path, plus teardown only if asked.']];
 lab('switch','Switching','Choose how the network moves traffic, then watch setup and transmission on the topology.',[
  option('Datagram',[
- step('Send independent datagrams','Routers select the next hop from the destination IP. A route change can send a later packet along a different path.',[send('A','R1','Packet 1'),send('A','R1','Packet 2','#8195c2',.35)],[['Store and forward','Receive the full frame before transmitting it on the next link.']]),
- step('Forwarding paths diverge','Illustrative routing change sends the two datagrams toward different next hops.',[send('R1','R2','Packet 1'),send('R1','ALT','Packet 2','#8195c2')],[['Possible outcome','Different arrival times and out-of-order delivery.']]),
- step('Both packets arrive','Host B receives separate datagrams. Its transport protocol may handle ordering.',[send('R2','B','Packet 1'),send('ALT','B','Packet 2','#8195c2')])
+ step('Send independent datagrams','Routers select the next hop from the destination IP. A route change can send a later packet along a different path.',[send('A','R1','Packet 1'),send('A','R1','Packet 2','#97999c',.35)],[['Store and forward','Receive the full frame before transmitting it on the next link.']]),
+ step('Forwarding paths diverge','Illustrative routing change sends the two datagrams toward different next hops.',[send('R1','R2','Packet 1'),send('R1','ALT','Packet 2','#97999c')],[['Possible outcome','Different arrival times and out-of-order delivery.']]),
+ step('Both packets arrive','Host B receives separate datagrams. Its transport protocol may handle ordering.',[send('R2','B','Packet 1'),send('ALT','B','Packet 2','#97999c')])
  ],['A','R1','R2','ALT','B'],[['A','R1'],['R1','R2'],['R2','B'],['R1','ALT'],['ALT','B']]),
  ...['Virtual circuit','Circuit switching'].map((label,i)=>option(label,[
- step('Set up the path','A setup request travels through the switches and a confirmation returns.',[send('A','R1','Setup'),send('R1','R2','Setup','#647fb5',.32),send('R2','B','Setup','#647fb5',.64)]),
- step('Confirm the path','The destination confirms that setup is complete.',[send('B','R2','Confirm'),send('R2','R1','Confirm','#647fb5',.32),send('R1','A','Confirm','#647fb5',.64)]),
- step(i?'Transmit the bit stream':'Forward using VC identifiers',i?'Resources are reserved. Bits can be present on several links as the stream advances.':'All packets follow the established path. A switch maps incoming interface and VC identifier to an outgoing pair.',[send('A','R1',i?'Bits':'VC 7'),send('R1','R2',i?'Bits':'VC 12','#8195c2',i?.12:.32),send('R2','B',i?'Bits':'VC 5','#8195c2',i?.24:.64)],[['Forwarding state',i?'Reserved circuit':'Local VC identifiers']],[['Path','A → R1 → R2 → B']],[i?'Bit stream':'VC header','Payload']),
- step('Release state','When the connection closes, the switches release the circuit or virtual-circuit state.',[send('A','R1','Release'),send('R1','R2','Release','#647fb5',.32),send('R2','B','Release','#647fb5',.64)])
+ step('Set up the path','A setup request travels through the switches and a confirmation returns.',[send('A','R1','Setup'),send('R1','R2','Setup','#4a5c74',.32),send('R2','B','Setup','#4a5c74',.64)]),
+ step('Confirm the path','The destination confirms that setup is complete.',[send('B','R2','Confirm'),send('R2','R1','Confirm','#4a5c74',.32),send('R1','A','Confirm','#4a5c74',.64)]),
+ step(i?'Transmit the bit stream':'Forward using VC identifiers',i?'Resources are reserved. Bits can be present on several links as the stream advances.':'All packets follow the established path. A switch maps incoming interface and VC identifier to an outgoing pair.',[send('A','R1',i?'Bits':'VC 7'),send('R1','R2',i?'Bits':'VC 12','#97999c',i?.12:.32),send('R2','B',i?'Bits':'VC 5','#97999c',i?.24:.64)],[['Forwarding state',i?'Reserved circuit':'Local VC identifiers']],[['Path','A → R1 → R2 → B']],[i?'Bit stream':'VC header','Payload']),
+ step('Release state','When the connection closes, the switches release the circuit or virtual-circuit state.',[send('A','R1','Release'),send('R1','R2','Release','#4a5c74',.32),send('R2','B','Release','#4a5c74',.64)])
  ]))
 ],switchingNotes);
 const routerNet=['R1','R2','ALT','B'];const routerLinks=[['R1','R2'],['R1','ALT'],['R2','B'],['ALT','B']];
 const ripFields=version=>[['Transport','UDP destination port 520'],['RIP command','2 · Response'],['Version',version],['Address family','2 · IPv4'],['Destination network','203.0.113.0'],...(version===2?[['Subnet mask','255.255.255.0'],['Route tag','0 in this example'],['Next hop','0.0.0.0 · use sender']]:[]),['Metric','2 hops']];
-const ospf=(title,desc,from,to,type,fields=[],ops=[])=>step(title,desc,[send(from,to,title.split(' · ')[0],'#8195c2')],ops,[['OSPF Version','2'],['OSPF Packet Type',type],['Area ID','0.0.0.0'],['IP protocol','89'],...fields],['IPv4','OSPF header · 24 B','OSPF body']);
+const ospf=(title,desc,from,to,type,fields=[],ops=[])=>step(title,desc,[send(from,to,title.split(' · ')[0],'#97999c')],ops,[['OSPF Version','2'],['OSPF Packet Type',type],['Area ID','0.0.0.0'],['IP protocol','89'],...fields],['IPv4','OSPF header · 24 B','OSPF body']);
 lab('route','Routing protocols','See the control packets that build routing tables. Choose a protocol or a failure scenario.',[
  ...[1,2].map(i=>option('RIPv'+i,[
  step('Send a RIP request','A newly started router can request routes from a neighbor.',[send('R1','R2','Request')],[['RIP command','1 · Request']],[['Transport','UDP 520'],['RIP version',i]],['IPv4','UDP','RIP']),
- step('Exchange distance vectors','Each router advertises its current distances. R1 evaluates the offers arriving from two neighbors.',[send('R2','R1','Response'),send('ALT','R1','Response','#8195c2')],[['Via R2','1 + 2 = 3 hops'],['Via R3','1 + 4 = 5 hops']],ripFields(i),['IPv4','UDP','RIP']),
+ step('Exchange distance vectors','Each router advertises its current distances. R1 evaluates the offers arriving from two neighbors.',[send('R2','R1','Response'),send('ALT','R1','Response','#97999c')],[['Via R2','1 + 2 = 3 hops'],['Via R3','1 + 4 = 5 hops']],ripFields(i),['IPv4','UDP','RIP']),
  step('Install the best route','The distance-vector update adds local link cost to each neighbor’s advertised cost and chooses the minimum.',[],[['Bellman–Ford update','min(3, 5) = 3 via R2.']],[['Metric','3 hops'],['Next hop','R2'],['Regular updates',i===1?'Broadcast':'Multicast 224.0.0.9']],['Routing table'])
  ],routerNet,routerLinks)),
  option('RIP failure',[
- step('A route becomes unreachable','R2 detects the failure and marks the route metric 16. A triggered update can notify neighbors without waiting for the regular timer.',[send('R2','R1','Metric 16','#ffcc72')],[['Route poisoning','16 means unreachable.'],['Next hop','R1 invalidates its route through R2 unless it finds a valid alternative.']],[['Metric','16'],['Update','Triggered']],['IPv4','UDP','RIP']),
- step('Prevent a two-router loop','A route learned from a neighbor is either omitted in updates back to that neighbor (split horizon) or explicitly advertised back as 16 (poison reverse).',[send('R1','R2','Poison reverse','#ffcc72')],[['Count to infinity','Stale neighbor advertisements can otherwise cause repeated metric increases.']],[['Metric','16'],['Direction','Back toward learned next hop']],['IPv4','UDP','RIP']),
+ step('A route becomes unreachable','R2 detects the failure and marks the route metric 16. A triggered update can notify neighbors without waiting for the regular timer.',[send('R2','R1','Metric 16','#c4c7cc')],[['Route poisoning','16 means unreachable.'],['Next hop','R1 invalidates its route through R2 unless it finds a valid alternative.']],[['Metric','16'],['Update','Triggered']],['IPv4','UDP','RIP']),
+ step('Prevent a two-router loop','A route learned from a neighbor is either omitted in updates back to that neighbor (split horizon) or explicitly advertised back as 16 (poison reverse).',[send('R1','R2','Poison reverse','#c4c7cc')],[['Count to infinity','Stale neighbor advertisements can otherwise cause repeated metric increases.']],[['Metric','16'],['Direction','Back toward learned next hop']],['IPv4','UDP','RIP']),
  step('Expire and collect stale routes','For a route that receives no updates, expiration starts at the last accepted update. After expiration it remains in the table temporarily with metric 16.',[],[['Periodic','One per router, roughly every 30 seconds.'],['Expiration','180 seconds per valid route in the slide model.'],['Garbage collection','120 seconds per expired route in the slide model.']],[['Worked example','20 entries, 5 silent for 200 s'],['Timers running','1 + 15 + 5 = 21'],['Garbage time left','120 − (200 − 180) = 100 s']],['Routing table'])
  ],routerNet,routerLinks),
  option('OSPF exchange',[
@@ -197,7 +212,7 @@ lab('route','Routing protocols','See the control packets that build routing tabl
  step('Open a BGP session','BGP peers use an established TCP connection. OPEN negotiates session parameters.',[send('R1','R2','OPEN')],[['Session','eBGP across autonomous systems, iBGP within one AS.']],[['Transport','TCP port 179'],['BGP type','1 · OPEN']],['IPv4','TCP','BGP']),
  step('Confirm with KEEPALIVE','The peer confirms the OPEN and periodic keepalives can keep the session active.',[send('R2','R1','KEEPALIVE')],[],[['BGP type','4 · KEEPALIVE']],['IPv4','TCP','BGP']),
  step('Advertise or withdraw prefixes','The UPDATE conveys reachable prefixes and their path attributes or withdraws previously announced routes.',[send('R2','R1','UPDATE')],[['AS_PATH','R1 checks whether its own AS appears in the path.'],['Policy','A router can prefer a route based on configured policy.']],[['BGP type','2 · UPDATE'],['NLRI','203.0.113.0/24'],['AS_PATH','64502 64503'],['NEXT_HOP','R2'],['ORIGIN','IGP in this example']],['IPv4','TCP','BGP']),
- step('Report a session error','A BGP NOTIFICATION reports an error and closes the session.',[send('R1','R2','NOTIFICATION','#ffcc72')],[],[['BGP type','3 · NOTIFICATION']],['IPv4','TCP','BGP'])
+ step('Report a session error','A BGP NOTIFICATION reports an error and closes the session.',[send('R1','R2','NOTIFICATION','#c4c7cc')],[],[['BGP type','3 · NOTIFICATION']],['IPv4','TCP','BGP'])
  ],routerNet,routerLinks,{R1:'AS 64501',R2:'AS 64502',ALT:'Alternate peer',B:'External prefix'})
 ],[
  ['Distance vector vs link state vs path vector','RIP learns distances and next hops from neighbors. OSPF floods LSAs and runs Dijkstra on its database. BGP exchanges prefixes and path attributes across peering sessions.'],
@@ -256,7 +271,7 @@ function routerJourney(variant){
   detailStep('Cross the transit network','The frame leaves R1 and travels to R2. End-to-end IP addresses are carried inside the new Ethernet frame.','O','R2',[['Link transmission','The sender serializes the frame.'],['Signal propagation','Bits travel across the transit link.']],[['Source MAC','R1 eth1'],['Destination MAC','R2 ingress'],['TTL','63']]),
   detailStep('Deliver to Host B',variant===1?'R2 forwards the fragments to the directly connected subnet. Host B reassembles them before handing the payload to transport.':'R2 forwards directly to Host B. Host B receives the frame, removes the headers, and passes the payload upward.','R2','B',[['Direct delivery','R2 resolves Host B’s MAC using Host B’s IP.'],['Receiver',variant===1?'Reassemble using Identification, offsets and MF.':'Deliver the IP payload to the indicated transport protocol.']],[['Destination MAC','Host B'],['TTL','62']])
  );
- if(variant===1)for(const st of stages.slice(-3)){const path=st.paths[0];path.label='Frag 1';st.paths.push(send(path.from,path.to,'Frag 2','#75aecb',.21));}
+ if(variant===1)for(const st of stages.slice(-3)){const path=st.paths[0];path.label='Frag 1';st.paths.push(send(path.from,path.to,'Frag 2','#a5a7aa',.21));}
  return stages;
 }
 const mainBranches=['Fits MTU','Fragment · DF 0','Drop · DF 1','Invalid header','Expired TTL'];
@@ -665,14 +680,14 @@ function box(x,y,w,h,r,fill,stroke){
  ctx.beginPath();ctx.roundRect(x,y,w,h,r);ctx.fillStyle=fill;ctx.fill();
  if(stroke){ctx.strokeStyle=stroke;ctx.lineWidth=1;ctx.stroke();}
 }
-function label(text,x,y,color='#92aecb',size=11,align='center'){
+function label(text,x,y,color='#acaeb1',size=11,align='center'){
  ctx.textAlign=align;ctx.textBaseline='middle';ctx.font=size+'px monospace';ctx.fillStyle=color;ctx.fillText(text,x,y);
 }
-function token(x,y,text,color='#607dba',primary=false){
+function token(x,y,text,color='#4a5c74',primary=false){
  ctx.font='12px monospace';const width=ctx.measureText(text).width+21;
- ctx.shadowBlur=primary?15:0;ctx.shadowColor='#34508a';
- box(x-width/2,y-13,width,26,3,'#161f3e',color);
- ctx.shadowBlur=0;label(text,x,y,'#e5f3ff',12);
+ ctx.shadowBlur=primary?15:0;ctx.shadowColor='#354760';
+ box(x-width/2,y-13,width,26,3,'#1b222d',color);
+ ctx.shadowBlur=0;label(text,x,y,'#f1f3f6',12);
  if(primary){
   packetLocation=[x,y];
   for(const el of hitButtons.values()){
@@ -697,39 +712,39 @@ function draw(){
  if(world&&p)xfocus=world[p.from][0]+(world[p.to][0]-world[p.from][0])*frac;
  const drift=Math.sin(position*.85)*Math.min(w*.12,120);
  const cam=xfocus*zoom-drift+position*8;
- ctx.fillStyle='#1a3554';
+ ctx.fillStyle='#2a3444';
  for(let x=(36-cam*.26%36)%36;x<w;x+=36)for(let y=26;y<h;y+=36)ctx.fillRect(x,y,1,1);
- ctx.strokeStyle='#101c2c';ctx.lineWidth=1;
+ ctx.strokeStyle='#131821';ctx.lineWidth=1;
  for(let x=(144-cam*.51%144)%144;x<w;x+=144){ctx.beginPath();ctx.moveTo(x,0);ctx.lineTo(x,h);ctx.stroke();}
  if(mode==='encap'){
   const x=w*.46,ytop=128,gap=Math.min(44,Math.max(22,(h-210)/7)),width=Math.min(w-34,270);
   [...layerNames].reverse().forEach((name,n)=>{
    const y=ytop+n*gap;
-   box(x-width/2,y,width,gap-4,3,n===6-layer?'#1b294b':'#080f1a','#264566');
+   box(x-width/2,y,width,gap-4,3,n===6-layer?'#1b222d':'#0d0f13','#2a3444');
    label('L'+(7-n)+' '+name,x,y+(gap-4)/2);
    hotspot('osi-'+n,'Explain '+name,n===4?'forward':n===5?'ingress':branch?'destination':'sender',x,y+(gap-4)/2,width,gap-4);
   });
   const n=6-layer+(branch?-frac:frac)*.74;
-  token(x+width/2-30,ytop+n*gap+gap/2,'PDU','#607dba',true);return;
+  token(x+width/2-30,ytop+n*gap+gap/2,'PDU','#4a5c74',true);return;
  }
  if(routed){
   const offset=w*.4+drift-xfocus*zoom,pt=n=>[rnodes[n][0]*zoom+offset,mid+rnodes[n][1]*zoom];
   const left=pt('I')[0]-110*zoom,right=pt('O')[0]+110*zoom;
-  box(left,mid-109,right-left,218,4,'#07111e','#284769');
-  label('R1 / NETWORK PLANE',left+15,mid-91,'#77b2f6',11,'left');
-  label('INGRESS',left+16,mid+88,'#587d9f',10,'left');
-  label('EGRESS',right-16,mid+88,'#587d9f',10,'right');
+  box(left,mid-109,right-left,218,4,'#101319','#2a3444');
+  label('R1 / NETWORK PLANE',left+15,mid-91,'#afb1b4',11,'left');
+  label('INGRESS',left+16,mid+88,'#4a5c74',10,'left');
+  label('EGRESS',right-16,mid+88,'#4a5c74',10,'right');
   const chain=['A','I','V','F','H','N','M','O','R2','B'];
-  chain.slice(1).forEach((n,i)=>line(pt(chain[i]),pt(n),'#2d3d68',2));
-  [['V','Drop'],['M','Frag'],['Frag','O'],['M','ICMP']].forEach(([a,b])=>line(pt(a),pt(b),'#304763'));
+  chain.slice(1).forEach((n,i)=>line(pt(chain[i]),pt(n),'#2a3444',2));
+  [['V','Drop'],['M','Frag'],['Frag','O'],['M','ICMP']].forEach(([a,b])=>line(pt(a),pt(b),'#2a3444'));
   [['F','Routing table','DA → NA'],['N','ARP table','NA → MAC'],['M','MTU table','eth1 → 1280 B']].forEach(([n,name,detail])=>{
    const [x,y]=pt(n),dy=n==='M'?54:-57,sy=y+dy;
-   line([x,y],[x,sy],'#395d82');
-   box(x-59,sy-18,118,36,3,'#0e182f','#3b4e80');
+   line([x,y],[x,sy],'#354760');
+   box(x-59,sy-18,118,36,3,'#131821','#354760');
    hotspot('table-'+n,name,n==='N'?'arp-cache':nodeLessons[n],x,sy,118,36);
-   label(name,x,sy-6,'#bcdaff',10);label(detail,x,sy+8,'#82a6c9',10);
+   label(name,x,sy-6,'#d9dbde',10);label(detail,x,sy+8,'#a3a5a8',10);
   });
-  st.paths.forEach(path=>line(pt(path.from),pt(path.to),'#617fbe',2.5));
+  st.paths.forEach(path=>line(pt(path.from),pt(path.to),'#4a5c74',2.5));
   for(const [n,value] of Object.entries(rnodes)){
    const [x,y]=pt(n),active=p&&(n===p.from||n===p.to);
    if(x<-170||x>w+170)continue;
@@ -737,15 +752,15 @@ function draw(){
    const host=['A','B','R2'].includes(n);
    if(host){
     ctx.beginPath();ctx.ellipse(x,y-13,26,13,0,0,Math.PI*2);
-    ctx.fillStyle=active?'#253663':'#101f31';ctx.fill();ctx.strokeStyle='#659ad0';ctx.stroke();
-    if(n==='R2'){line([x-12,y-17],[x+12,y-9],'#c4e4ff',2);line([x-12,y-9],[x+12,y-17],'#c4e4ff',2);}
-    else label(n,x,y-13,'#d5e8ff');
-    label(value[2],x,y+18,'#c6e0f8');label(value[3],x,y+34,'#7e9fbd',10);
+    ctx.fillStyle=active?'#2a3444':'#131821';ctx.fill();ctx.strokeStyle='#97999c';ctx.stroke();
+    if(n==='R2'){line([x-12,y-17],[x+12,y-9],'#e0e2e5',2);line([x-12,y-9],[x+12,y-17],'#e0e2e5',2);}
+    else label(n,x,y-13,'#e7e9ec');
+    label(value[2],x,y+18,'#dddfe2');label(value[3],x,y+34,'#9c9ea1',10);
    }else{
-    box(x-72*zoom,y-20,144*zoom,40,4,active?'#1a274c':'#0b1828',active?'#687faf':'#3c5877');
-    label(value[2],x,y-6,active?'#f0f8ff':'#a5c1da',w<620?9:11);
-    label(value[3],x,y+8,'#a0aecd',w<620?8:9);
-    label('+',x+64*zoom,y-13,'#a3b4db',11);
+    box(x-72*zoom,y-20,144*zoom,40,4,active?'#1b222d':'#131821',active?'#4a5c74':'#354760');
+    label(value[2],x,y-6,active?'#f1f3f6':'#bec0c3',w<620?9:11);
+    label(value[3],x,y+8,'#afb1b4',w<620?8:9);
+    label('+',x+64*zoom,y-13,'#b6b8bb',11);
    }
   }
   st.paths.forEach((path,i)=>{
@@ -755,17 +770,17 @@ function draw(){
   return;
  }
  const opt=current(),pt=n=>[nodes[n][0]*w,nodes[n][1]*h*.62+86];
- opt.links.forEach(([a,b])=>line(pt(a),pt(b),'#2c4966',2));
+ opt.links.forEach(([a,b])=>line(pt(a),pt(b),'#2a3444',2));
  st.paths.forEach(path=>line(pt(path.from),pt(path.to),path.color,2));
  opt.visible.forEach(n=>{
   const [x,y]=pt(n),active=st.paths.some(path=>path.from===n||path.to===n);
-  box(x-21,y-15,42,30,3,active?'#123254':'#0b1725','#456789');
-  label(n==='ALT'?'R3':n,x,y,'#c4e3ff');
+  box(x-21,y-15,42,30,3,active?'#1b222d':'#101319','#354760');
+  label(n==='ALT'?'R3':n,x,y,'#e0e2e5');
   label(nodes[n][2],x,y+24);
   hotspot('generic-'+n,'Explain '+nodes[n][2]+' in this lab',activeLesson(),x,y,48,33);
-  if(w>650)label(opt.aliases[n]??nodes[n][3],x,y+39,'#7b9dbf',9);
+  if(w>650)label(opt.aliases[n]??nodes[n][3],x,y+39,'#9a9c9f',9);
  });
- if(!p){token(w*.4,mid+45,'PDU','#607dba',true);return;}
+ if(!p){token(w*.4,mid+45,'PDU','#4a5c74',true);return;}
  st.paths.forEach((path,i)=>{
   const a=pt(path.from),b=pt(path.to),t=Math.max(0,(frac-path.delay)/(1-path.delay));
   token(a[0]+(b[0]-a[0])*t,a[1]+(b[1]-a[1])*t-28,path.label,path.color,i===0);
