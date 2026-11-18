@@ -95,6 +95,8 @@ button[aria-pressed=true],.layer[aria-pressed=true]{background:#262626;border-co
 header{background:#101010}.layout>aside:first-child{background:#141414}
 button[aria-pressed=true],.layer[aria-pressed=true]{background:#2c2c2c;color:#f5f5f5;border-color:#595959;box-shadow:inset 2px 0 #b5b5b5}
 .controls,.card,.inspector{background:#191919f5!important}
+.overlay>.stage-heading{position:static;width:100%;margin-top:7px;display:flex;justify-content:space-between;pointer-events:none}
+.overlay .branches{margin-bottom:0}
 #definitions-dialog{width:min(740px,calc(100vw - 28px));max-width:none;max-height:86svh;overflow:auto;padding:0}
 .glossary-head{position:sticky;top:0;z-index:1;background:#161616;padding:16px 20px 10px;border-bottom:1px solid #393939}
 .glossary-filters{display:flex;gap:7px;flex-wrap:wrap}
@@ -115,8 +117,8 @@ button[aria-pressed=true],.layer[aria-pressed=true]{background:#2c2c2c;color:#f5
 <header><div class="brand"><b>⇄</b>NetworkTrain</div><nav class="toolbar" aria-label="Concepts at this point" id="toolbar"></nav><button id="definitions-button">Definitions</button><button class="tools-end" id="sources">Slide coverage</button></header>
 <div id="concept-pop" hidden></div><div id="rail"><div class="layout">
 <aside><div class="label">OSI model</div><nav class="layers" aria-label="OSI layers" id="layers"></nav><div class="directions"><button id="down">↓ Sender stack</button><button id="up">↑ Receiver stack</button></div></aside>
-<main><div class="overlay"><div class="label" id="section"></div><h1 id="title"></h1><p class="intro muted" id="intro"></p><div class="branches" id="branches"></div></div>
-<section class="stage" aria-label="Packet simulator"><div class="stage-heading"><h2 id="step-title"></h2><small class="live" id="counter"></small></div><canvas id="canvas" role="img" aria-label="Network topology and active packet paths"></canvas><div id="hit-layer" aria-label="Interactive blocks on the packet path"></div>
+<main><div class="overlay"><div class="label" id="section"></div><h1 id="title"></h1><p class="intro muted" id="intro"></p><div class="branches" id="branches"></div><div class="stage-heading"><h2 id="step-title"></h2><small class="live" id="counter"></small></div></div>
+<section class="stage" aria-label="Packet simulator"><canvas id="canvas" role="img" aria-label="Network topology and active packet paths"></canvas><div id="hit-layer" aria-label="Interactive blocks on the packet path"></div>
 <div class="controls"><button id="reset" title="Return to source">Reset</button><small>Drag the packet or scroll to travel</small><input id="scrub" type="range" min="0" value="0" aria-label="Packet position"><button id="router-map">Router map</button><button id="lab-menu">Labs &amp; notes</button></div></section>
 <div class="cards" id="operations"></div></main>
 <aside class="inspector" aria-label="Packet inspector"><div class="label">Packet inspector</div><h2 id="inspect-title"></h2><p id="inspect-description"></p><div class="stack" id="stack"></div><div class="fields" id="fields"></div><button id="inspect-more">Explain this stage</button></aside><aside id="lesson-drawer" aria-label="Concept lesson" hidden><div class="drawer-head"><div><div class="label" id="lesson-group"></div><h2 id="lesson-title"></h2></div><button id="lesson-close" aria-label="Close concept lesson">Close</button></div><div class="drawer-body" id="lesson-body"></div></aside>
