@@ -112,12 +112,25 @@ button[aria-pressed=true],.layer[aria-pressed=true]{background:#2c2c2c;color:#f5
 .keyword-list{display:flex;flex-wrap:wrap;gap:5px;margin:8px 0 14px}
 .keyword-list button{font-size:11px;background:#222}
 @media(max-width:760px){#definitions-button{font-size:11px;padding:5px 6px} .glossary-head{padding:12px}#definition-list{padding:5px 12px 12px}}
+</style><style>
+#stage-track{display:flex;gap:6px;overflow-x:auto;width:100%;margin-top:12px;padding:2px 2px 6px;scrollbar-width:thin}
+#stage-track[hidden]{display:none}
+#stage-track button{display:flex;align-items:start;gap:7px;flex:0 0 clamp(105px,15vw,180px);min-height:42px;text-align:left;line-height:1.25;white-space:normal}
+#stage-track button span{font-variant-numeric:tabular-nums;color:#b1b1b1}
+#stage-track button[aria-current=step]{background:#303030;border-color:#8c8c8c}
+.stage-context{border:1px solid #464646;border-radius:5px;background:#1c1c1c;padding:10px;margin-bottom:14px}
+.stage-context h3{margin:5px 0}
+.stage-context dl{margin:8px 0 0;display:grid;grid-template-columns:minmax(90px,auto) 1fr;gap:4px 10px;font-size:12px}
+.stage-context dt{color:#b3b3b3}.stage-context dd{margin:0;overflow-wrap:anywhere}
+.stage-context .packet-layers{display:flex;gap:4px;flex-wrap:wrap;margin-top:8px}
+.stage-context .packet-layers span{background:#282828;border:1px solid #525252;padding:2px 5px;border-radius:4px;font-size:11px}
+@media(max-height:640px){#stage-track{margin-top:5px}#stage-track button{min-height:32px}}
 </style></head>
 <body>
 <header><div class="brand"><b>⇄</b>NetworkTrain</div><nav class="toolbar" aria-label="Concepts at this point" id="toolbar"></nav><button id="definitions-button">Definitions</button><button class="tools-end" id="sources">Slide coverage</button></header>
 <div id="concept-pop" hidden></div><div id="rail"><div class="layout">
 <aside><div class="label">OSI model</div><nav class="layers" aria-label="OSI layers" id="layers"></nav><div class="directions"><button id="down">↓ Sender stack</button><button id="up">↑ Receiver stack</button></div></aside>
-<main><div class="overlay"><div class="label" id="section"></div><h1 id="title"></h1><p class="intro muted" id="intro"></p><div class="branches" id="branches"></div><div class="stage-heading"><h2 id="step-title"></h2><small class="live" id="counter"></small></div></div>
+<main><div class="overlay"><div class="label" id="section"></div><h1 id="title"></h1><p class="intro muted" id="intro"></p><div class="branches" id="branches"></div><div class="stage-heading"><h2 id="step-title"></h2><small class="live" id="counter"></small></div><nav id="stage-track" aria-label="Interactive packet stages" hidden></nav></div>
 <section class="stage" aria-label="Packet simulator"><canvas id="canvas" role="img" aria-label="Network topology and active packet paths"></canvas><div id="hit-layer" aria-label="Interactive blocks on the packet path"></div>
 <div class="controls"><button id="reset" title="Return to source">Reset</button><small>Drag the packet or scroll to travel</small><input id="scrub" type="range" min="0" value="0" aria-label="Packet position"><button id="router-map">Router map</button><button id="lab-menu">Labs &amp; notes</button></div></section>
 <div class="cards" id="operations"></div></main>
@@ -127,7 +140,7 @@ button[aria-pressed=true],.layer[aria-pressed=true]{background:#2c2c2c;color:#f5
  <div class="glossary-head"><div class="dialog-top"><h2 id="definitions-title">Definitions &amp; keywords</h2><form method="dialog"><button>Close</button></form></div>
  <div class="glossary-filters"><input id="definition-search" type="search" aria-label="Search terms, abbreviations and descriptions" placeholder="Search e.g. DF, transit, or poison reverse"><select id="definition-group" aria-label="Definition topic"><option value="">All topics</option></select><button id="definition-context" aria-pressed="false">Current stage</button></div>
  <small id="def-status" aria-live="polite"></small></div><div id="definition-list"></div>
-</dialog><dialog id="map-dialog"><div class="dialog-top"><h2>R1 · Router map</h2><form method="dialog"><button>Close</button></form></div><p class="muted">Follow the datagram from the incoming interface to the outgoing interface. Select a stage to jump there.</p><div id="map-stages"></div></dialog><dialog id="lab-dialog"><div class="dialog-top"><h2>Packet labs</h2><form method="dialog"><button>Close</button></form></div><div class="branches" id="lab-list"></div><h3>Concept library</h3><div id="lesson-index"></div><section class="notes" id="notes"></section></dialog>
+</dialog><dialog id="map-dialog"><div class="dialog-top"><h2 id="map-title">R1 · Router map</h2><form method="dialog"><button>Close</button></form></div><p class="muted" id="map-description">Follow the datagram from the incoming interface to the outgoing interface. Select a stage to jump there.</p><div id="map-stages"></div></dialog><dialog id="lab-dialog"><div class="dialog-top"><h2>Packet labs</h2><form method="dialog"><button>Close</button></form></div><div class="branches" id="lab-list"></div><h3>Concept library</h3><div id="lesson-index"></div><section class="notes" id="notes"></section></dialog>
 <dialog id="source-dialog"><div class="dialog-top"><h2>Slide coverage</h2><form method="dialog"><button>Close</button></form></div><ul class="source-list" id="source-list"></ul></dialog>
 <script>
 'use strict';
@@ -260,7 +273,8 @@ function button(text,action,selected,cls){
  if(selected!==undefined)el.setAttribute('aria-pressed',selected);
  return el;
 }
-const upperLayers={tcp:3,udp:3,application:6,dhcp:6,dns:6,http:6};
+const labLayers={physical:0,datalink:1,tcp:3,udp:3,session:4,presentation:5,application:6,dhcp:6,dns:6,http:6};
+const layerHomes=['physical','datalink','journey','tcp','session','presentation','application'];
 const endpoints=['A','B'];
 const endpointLink=[['A','B']];
 function exchange(label,steps,aliases={},visible=endpoints,links=endpointLink,names={}){
@@ -391,7 +405,61 @@ modes.application.options.push(exchange('Open a website',[
  wire('4 · Send an HTTP request','The browser writes a GET request to the established TCP byte stream. This example uses HTTP/1.1 without TLS.','A','B','HTTP GET',['IP','TCP','HTTP/1.1'],[['Request','GET / HTTP/1.1'],['Host','www.example.com']]),
  wire('5 · Read the response','The server replies with a status, headers and the representation. The browser can issue more requests on the reusable connection.','B','A','200 OK',['IP','TCP','HTTP/1.1'],[['Content-Type','text/html']])
  ],{A:'192.0.2.40 after DHCP',R1:'UDP 67',R2:'192.0.2.53',B:'203.0.113.20'},['A','R1','R2','B'],[['A','R1'],['A','R2'],['A','B']],{R1:'DHCP server',R2:'DNS resolver',B:'Web server'}));
-const tabs=[['journey','Packet journey'],['encap','OSI encapsulation'],['unicast','Unicast'],['multi','Multicast'],['broadcast','Broadcast'],['arp','ARP'],['forward','Forwarding'],['switch','Switching'],['route','Routing protocols'],['tcp','TCP'],['udp','UDP'],['application','Application layer'],['dhcp','DHCP'],['dns','DNS'],['http','HTTP']];
+const layerExamples=[
+ {id:'physical',layer:0,title:'Physical layer',intro:'Trace bits from the transmitter to the receiver and compare line encodings.',topics:[
+ ['NRZI and AMI','Encoding bits as signals',[
+ ['Choose the starting level','A line-code waveform needs an initial level. The examples use the course convention where NRZI changes level for a 1.','Bits','10110',[['Starting level','Low'],['Convention','1 → transition; 0 → hold']]],
+ ['Encode with NRZI','Beginning low, toggle at each 1 and hold at each 0.','NRZI','10110',[['Bit value','1   0   1   1   0'],['Level after bit begins','H   H   L   H   H']]],
+ ['Compare bipolar AMI','A zero has zero voltage. Consecutive marks (ones) alternate between positive and negative.','AMI','10110',[['First mark','Positive by assumption'],['Signal levels','+   0   −   +   0']]],
+ ['Decode at the receiver','Sample each interval. Compare adjacent levels for NRZI and distinguish zero from either pulse polarity for AMI.','Recovered bits','10110',[['On the receiving side','Use the same coding convention and initial reference']]]]],
+ ['Serialization and propagation','How bits travel along a link',[
+ ['Serialize the frame','The transmitter puts bits onto the medium at the link rate.','Bit stream','1000 bits',[['Rate','1 Mb/s'],['Serialization time','1000 / 1,000,000 = 1 ms']]],
+ ['Propagate along the link','The first bit begins travelling while later bits enter the link.','Signal','100 km',[['Speed','2 × 10⁸ m/s'],['Propagation time','100,000 / (2 × 10⁸) = 0.5 ms']]],
+ ['Recover the frame bits','The last bit arrives one propagation delay after it enters the link.','Recovered bits','Last bit',[['First bit arrival','0.5 ms'],['Last bit arrival','1.5 ms']]]]]
+ ]},
+ {id:'datalink',layer:1,title:'Data Link layer',intro:'Inspect Ethernet and follow frame recovery in the ARQ examples.',topics:[
+ ['Ethernet forwarding','Frame delivery on one LAN',[
+ ['Build an Ethernet frame','The local sender wraps the IP datagram in a frame. The destination MAC identifies the receiver on this hop.','Ethernet','IPv4 payload',[['Source MAC','Host A'],['Destination MAC','Host B'],['EtherType','0x0800'],['Trailer','FCS']]],
+ ['Learn or look up the MAC','The switch learns the source MAC on the ingress port. It forwards a known unicast on the matching port, or floods unknown unicast within the VLAN except through the ingress port.','Switch lookup','Destination MAC',[['Learns from','Source address'],['Forwards using','Destination address']]],
+ ['Verify and unwrap','The receiver checks frame integrity, then uses EtherType to pass the payload to IPv4.','IPv4 payload','After decapsulation',[['Checked','FCS'],['Delivered to','Network layer']]]]],
+ ['Stop-and-Wait ARQ','One outstanding frame',[
+ ['Send frame 0','The sender transmits one numbered frame and waits.','Frame 0','Waiting for ACK',[['Window','1 outstanding frame']]],
+ ['ACK is lost','The receiver accepted the frame but its acknowledgment did not arrive at the sender.','ACK 0','Lost',[['Receiver state','Expects frame 1'],['Sender state','Still waiting for ACK 0']]],
+ ['Timeout and retransmit','The sender transmits frame 0 again. The receiver recognizes the duplicate, avoids delivering it twice, and repeats the ACK.','Frame 0','Retransmission',[['Reason','ACK timeout'],['Duplicate handling','Acknowledge without redelivery']]]]],
+ ['Sliding-window ARQ','Go-Back-N and Selective Repeat',[
+ ['Send within a window','Several frames can be outstanding, keeping the link busy during propagation. Assume frames 0–3 are sent and frame 1 is lost.','Frames 0–3','Frame 1 lost',[['Window W','4'],['Gap','Frame 1']]],
+ ['Go-Back-N recovery','In basic Go-Back-N, the receiver discards subsequent out-of-order frames. The sender retransmits the missing frame and all later outstanding frames.','Frames 1–3','Go-Back-N',[['Receiver window','1'],['Retransmission','1, 2, 3']]],
+ ['Selective Repeat recovery','In the alternative Selective Repeat exchange, the receiver buffers later frames within its window. Only the missing frame needs retransmission here.','Frame 1','Selective Repeat',[['Buffered','2 and 3'],['Retransmission','1']]]]]
+ ]},
+ {id:'session',layer:4,title:'Session layer',intro:'Follow a dialogue across opening, synchronization and recovery.',topics:[
+ ['Dialogue lifecycle','Manage an ongoing exchange',[
+ ['Establish a dialogue','The peers establish context for an ongoing exchange, such as a session identifier and agreed rules for resuming work.','Open dialogue','S-42',[['Session','S-42'],['Model','Illustrative OSI dialogue']]],
+ ['Exchange and checkpoint','The application confirms that a unit of work is complete and records that progress in session state.','Checkpoint','Chunk 3 committed',[['Last committed unit','3']]],
+ ['Resume after interruption','After reconnecting, the peers use the saved checkpoint and continue at chunk 4. Whether resumption is possible depends on the protocol.','Resume','Chunk 4',[['Recovery','Continue after committed unit 3']]],
+ ['Close dialogue','When the exchange finishes, peers release the context associated with this session.','Close dialogue','S-42',[['Session state','Closed']]]]]
+ ]},
+ {id:'presentation',layer:5,title:'Presentation layer',intro:'See how two endpoints agree on how to represent, transform and interpret data.',topics:[
+ ['Encode and decode','Represent structured data as bytes',[
+ ['Choose the representation','The endpoints agree on a data format and character encoding. JSON describes the structure and UTF-8 describes the bytes representing its text.','JSON + UTF-8','Sender',[['Format','JSON'],['Character encoding','UTF-8']]],
+ ['Serialize to bytes','The sender turns its structured value into a JSON text representation and encodes it.','UTF-8 bytes','On the wire',[['Example value','{"name":"Prisha"}']]],
+ ['Decode and parse','The receiver decodes the bytes as UTF-8 and parses the structure back into a value.','Parsed value','Receiver',[['Meaning','A name field containing Prisha']]]]],
+ ['Compress and protect','Apply and reverse transformations',[
+ ['Compress the representation','When compression is agreed, the sender may encode the representation more compactly before transmission.','gzip','Compression',[['Purpose','Reduce size'],['Receiver needs','Matching decompressor']]],
+ ['Protect in transit','A secure channel can encrypt the resulting bytes. The concrete protocol stack determines where these functions are implemented.','Encrypted data','On the wire',[['Purpose','Confidentiality']]],
+ ['Reverse the transformations','The receiver decrypts through the secure channel, decompresses if applicable, then interprets the representation.','Decoded data','Receiver',[['Order','Decrypt → decompress → interpret']]]]]
+ ]}
+];
+for(const item of layerExamples){
+ lab(item.id,item.title,item.intro,item.topics.map(([name,,rows])=>{
+  const steps=rows.map(([title,description,message,detail,fields],i)=>{
+   const reverse=(item.id==='datalink'&&name==='Stop-and-Wait ARQ'&&i===1);
+   return wire(title,description,reverse?'B':'A',reverse?'A':'B',message,[item.title,detail],fields);
+  });
+  return exchange(name,steps,{A:'Sending endpoint',B:'Receiving endpoint'});
+ }),[['Model and practice',item.id==='session'||item.id==='presentation'?'These are OSI functions. In typical TCP/IP stacks the equivalent functionality is implemented in application protocols or libraries.':'Walk the stages in order and inspect the fields at each step.']]);
+}
+
+const tabs=[['journey','Packet journey'],['encap','OSI encapsulation'],['unicast','Unicast'],['multi','Multicast'],['broadcast','Broadcast'],['arp','ARP'],['forward','Forwarding'],['switch','Switching'],['route','Routing protocols'],['tcp','TCP'],['udp','UDP'],['application','Application layer'],['dhcp','DHCP'],['dns','DNS'],['http','HTTP'],['physical','Physical layer'],['datalink','Data Link layer'],['session','Session layer'],['presentation','Presentation layer']];
 const rnodes={
  A:[0,0,'Host A','192.0.2.10'],I:[580,0,'Ingress','Ethernet / PHY'],V:[790,0,'Validate IPv4','Length · version · checksum'],
  F:[1025,0,'Next-hop lookup','Destination → prefix → interface'],H:[1250,0,'Update IPv4','TTL · header checksum'],
@@ -438,6 +506,7 @@ modes.journey.options=[
 ];
 modes.journey.subtitle='Drag the packet to follow the forwarding path.';
 const refs=[
+ ['OSI model · Layers 1, 2, 5, 6','Illustrative labs on physical signaling, Ethernet and ARQ, session checkpoints, and representation transforms.'],
  ['Transport Layer 1 · UDP','Ports, sockets, user-datagram format, checksum, queues, multiplexing and applications.'],
  ['Transport Layer 2 · TCP','Byte stream, buffers, segment fields, sequence and ACK examples, setup, transfer and termination.'],
  ['CNP Chapter 17 · Application','Client–server design, iterative and concurrent service, socket interfaces.'],
@@ -659,11 +728,40 @@ const upperStudy=[
 for(const [id,group,title,slides,summary,flow,example,questions] of upperStudy){
  lesson(id,group,title,slides,summary,flow,example,questions);
 }
+const lowerStudy=[
+ ['physical','Physical','Physical signals and line coding','OSI model · Physical layer',
+ 'The physical layer represents bits as signals over a medium. The receiver recovers the bit stream using the agreed line code and timing.',
+ ['Choose an encoding and starting condition','Convert bits to signal changes or levels','Serialize at the link rate','Propagate the signal','Sample and decode at the receiver'],
+ 'For 10110 with an initially low level and transition-on-1 NRZI, the levels are high, high, low, high, high. AMI with a positive first mark gives +, 0, −, +, 0.',
+ [['What if the first bit is 1?','NRZI toggles from the specified initial level. If it started low, the first 1 begins high.'],['How do serialization and propagation differ?','Serialization is L/R. Propagation is distance divided by signal speed. The first bit can propagate before the last bit is serialized.']],
+ [['NRZI','Differential signaling whose bit interpretation depends on a transition convention.','This lab uses a transition for 1 and holds the current level for 0.'],['Bipolar AMI','Line code with zero level for 0 and alternating polarity for successive 1s.','The first 1 can be assigned positive polarity by convention.'],['Bit rate','Number of transmitted bits per second.','1000 bits at 1 Mb/s take 1 ms to serialize.']]],
+ ['datalink','Data Link','Frames and reliable link delivery','OSI model · Data Link layer',
+ 'Data Link operates over a local link. Ethernet provides framing, hardware addresses and error detection. ARQ illustrates link protocols that use feedback and retransmission to recover from loss.',
+ ['Frame the network-layer payload','Use local addresses for delivery','Check for errors at reception','If the link protocol uses ARQ, acknowledge or retry','Hand an accepted payload upward'],
+ 'If frame 1 is lost with frames 2 and 3 outstanding, basic Go-Back-N sends 1, 2, and 3 again. Selective Repeat can buffer 2 and 3 and request or trigger recovery of frame 1 alone.',
+ [['Does Ethernet’s FCS fix errors?','It detects corruption. Ethernet itself does not run the ARQ exchanges shown here.'],['Why number Stop-and-Wait frames?','A repeated frame can result from a lost ACK. Sequence numbers let the receiver recognize duplicates.'],['What does an Ethernet switch learn?','It learns port associations from source MAC addresses and uses destinations for forwarding.']],
+ [['Ethernet switching','Frame forwarding using local MAC-to-port associations.','An unknown destination can be flooded within the VLAN.'],['Stop-and-Wait ARQ','A link reliability method with at most one outstanding frame.','If the ACK is lost, timeout causes retransmission.'],['Go-Back-N','A sliding-window ARQ method that resends from the oldest unacknowledged frame after recovery is triggered.','A missing frame can cause later outstanding frames to be sent again.'],['Selective Repeat','A sliding-window ARQ method that can buffer valid later frames and recover missing frames individually.','After frame 1 arrives, buffered 2 and 3 can be delivered in order.'],['Sliding window','A moving range of sequence numbers which may be outstanding or accepted.','Its size limits how many frames can remain in flight.']]],
+ ['session','Session','Dialogue, checkpoints and recovery','OSI model · Session layer',
+ 'The Session layer models setting up, managing, and closing a dialogue. It includes conceptual functions such as coordinating an exchange and resuming from an agreed point.',
+ ['Establish context','Exchange messages','Commit a checkpoint','Recover from an interruption if supported','Release the dialogue state'],
+ 'If both peers recorded chunk 3 as committed, a resumable transfer can restart at chunk 4 after reconnecting.',
+ [['Does a new TCP connection automatically restore a session?','Session resumption requires protocol or application support. A new connection provides transport for the resumption exchange.']],
+ [['Session','Context for an ongoing exchange between peers.','A session ID can associate several related messages.'],['Checkpoint','A recorded point of confirmed progress that can support recovery.','A resumed transfer can continue after the last committed chunk.']]],
+ ['presentation','Presentation','Representation and reversible transforms','OSI model · Presentation layer',
+ 'The Presentation layer models transforming data so that peers agree on its representation. Encoding, serialization, compression, and encryption illustrate those functions.',
+ ['Choose a representation','Serialize a value','Encode it as bytes','Apply agreed transforms','Reverse transforms and parse at the receiver'],
+ 'JSON defines a textual data structure and UTF-8 maps its characters to bytes. Once decoded, a receiver parses that text back into a structured value.',
+ [['Are encoding and encryption the same?','Encoding defines a representation. Encryption uses cryptography to protect confidentiality.'],['Where are these functions implemented in practice?','TCP/IP applications commonly use application protocols and libraries to perform them.']],
+ [['Serialization','Converting a structured value into a representation for transport or storage.','An object can be serialized into JSON text.'],['Character encoding','A mapping between text characters and byte sequences.','UTF-8 encodes Unicode characters.'],['Compression','Representing data using fewer bytes when possible.','The receiver reverses an agreed lossless encoding such as gzip.'],['Encryption','Using a cryptographic transformation to protect data confidentiality.','A receiver with the required key can recover the protected plaintext.']]]
+];
+upperStudy.push(...lowerStudy);
+
 const upperTopics={
+ physical:['Line coding','Link timing'],datalink:['Frames and ARQ','ARP'],session:['Session dialogue'],presentation:['Data representation'],
  tcp:['TCP exchange','TCP header and windows'],udp:['UDP datagram'],application:['Client and server'],
  dhcp:['DHCP lease'],dns:['DNS resolution','DNS records'],http:['HTTP messages','HTTP state']
 };
-const upperConcepts={'TCP exchange':'tcp','TCP header and windows':'tcp-fields','UDP datagram':'udp','Client and server':'application','DHCP lease':'dhcp','DNS resolution':'dns','DNS records':'dns-message','HTTP messages':'http','HTTP state':'http-state'};
+const upperConcepts={'Line coding':'physical','Link timing':'delay','Frames and ARQ':'datalink','Session dialogue':'session','Data representation':'presentation','TCP exchange':'tcp','TCP header and windows':'tcp-fields','UDP datagram':'udp','Client and server':'application','DHCP lease':'dhcp','DNS resolution':'dns','DNS records':'dns-message','HTTP messages':'http','HTTP state':'http-state'};
 
 const definitions=[
 ["Network layer", "The OSI layer that addresses and transfers packets across interconnected networks.", "The source creates the datagram, intermediate routers forward it, and the destination delivers its payload.", "sender"],
@@ -876,7 +974,7 @@ const related={
 function activeLesson(){
  if(mode==='http'&&branch===1)return 'http-state';
  if(mode==='application'&&branch===2)return ['dhcp','dns','tcp','http','http'][index];
- if(upperLayers[mode])return mode;
+ if(mode in labLayers)return mode;
  if(mode==='journey')return branch===5||index===0?'sender':nodeLessons[currentStep().paths[0]?.to]||'sender';
  if(mode==='route'){
   if(branch<=1)return index===2?'bellman':'rip';
@@ -987,7 +1085,7 @@ function closeLesson(){
  lessonTrigger=null;
 }
 $('lesson-close').onclick=closeLesson;
-$('inspect-more').onclick=e=>openLesson(activeLesson(),e.currentTarget);
+$('inspect-more').onclick=e=>inspectStage(e.currentTarget);
 addEventListener('keydown',e=>{if(e.key==='Escape'&&!$('lesson-drawer').hidden)closeLesson();});
 const grouped=new Map();
 for(const [id,item] of Object.entries(lessons)){
@@ -1020,21 +1118,57 @@ function nav(){
   $('layers').dataset.key=key;
   $('layers').replaceChildren(...layerNames.map((name,n)=>{
    const el=button(undefined,()=>{
-    if(n===2){choose('journey');return;}
-    if(n===3){choose('tcp');return;}
-    if(n===6){choose('application');return;}
-    const side=mode==='encap'?branch:0;
-    choose('encap',side,side?n:6-n);
+    choose(layerHomes[n]);
    },layer===n,'layer');
    el.append(make('span','L'+(n+1)),document.createTextNode(name));return el;
   }).reverse());
  }
 }
+function inspectStage(trigger){
+ const st=currentStep();
+ openLesson(activeLesson(),trigger);
+ const context=make('section',undefined,'stage-context');
+ context.append(make('div','Current stage','label'),make('h3',st.title),make('p',st.description));
+ const headers=make('div',undefined,'packet-layers');
+ headers.append(...st.stack.map(name=>make('span',name)));
+ context.append(headers);
+ if(st.fields.length){
+  const fields=make('dl');
+  for(const [name,value] of st.fields)fields.append(make('dt',name),make('dd',String(value)));
+  context.append(fields);
+ }
+ $('lesson-body').prepend(context);
+}
+let trackKey='';
+function renderStageTrack(steps){
+ const track=$('stage-track');
+ const show=mode in labLayers;
+ track.hidden=!show;
+ if(!show)return;
+ const key=mode+':'+branch;
+ if(trackKey!==key){
+  trackKey=key;
+  track.replaceChildren(...steps.map((st,n)=>{
+   const control=button(undefined,e=>{place(n,true);inspectStage(e.currentTarget);});
+   control.append(make('span',String(n+1).padStart(2,'0')),make('strong',st.title));
+   return control;
+  }));
+  track.scrollLeft=0;
+ }
+ for(const [n,control] of Array.from(track.children).entries()){
+  if(n===index){
+   control.setAttribute('aria-current','step');
+   if(control.offsetLeft<track.scrollLeft)track.scrollLeft=control.offsetLeft;
+   else if(control.offsetLeft+control.offsetWidth>track.scrollLeft+track.clientWidth)
+    track.scrollLeft=control.offsetLeft+control.offsetWidth-track.clientWidth+4;
+  }else control.removeAttribute('aria-current');
+ }
+}
 function branchControls(){
  const opts=current().steps;
  $('branches').replaceChildren();
- if(upperLayers[mode]){
-  for(const [id,name] of tabs.filter(([id])=>upperLayers[id]===upperLayers[mode])) $('branches').append(button(name,()=>choose(id),mode===id));
+ if(mode in labLayers){
+  for(const [id,name] of tabs.filter(([id])=>labLayers[id]===labLayers[mode])) $('branches').append(button(name,()=>choose(id),mode===id));
   for(const [n,o] of modes[mode].options.entries()) $('branches').append(button(o.label,()=>choose(mode,n),n===branch));
  }else if(mode==='journey'&&branch<5){
   if(index<4&&branch===0){
@@ -1049,6 +1183,8 @@ function branchControls(){
 function render(){
  if(mode==='encap')layer=branch?index:6-index;
  const selected=modes[mode],st=currentStep(),steps=branchControls();
+ renderStageTrack(steps);
+ $('router-map').textContent=mode==='journey'?'Router map':'Stage map';
  $('section').textContent=mode==='encap'?'OSI / L'+(layer+1):'OSI / L'+(layer+1)+' / '+layerNames[layer].toUpperCase();
  $('title').textContent=selected.name;
  $('intro').textContent=selected.subtitle;
@@ -1077,7 +1213,7 @@ function layoutRail(){
  $('rail').style.height='calc(100svh + '+Math.ceil(limit()*span)+'px)';
 }
 function choose(id,choice=0,at=0){
- closeLesson();mode=id;branch=choice;layer=upperLayers[id]??2;position=Math.min(at,limit());index=Math.floor(position);
+ closeLesson();mode=id;branch=choice;layer=labLayers[id]??2;position=Math.min(at,limit());index=Math.floor(position);
  $('scrub').max=limit();$('scrub').step=.002;
  $('concept-pop').hidden=true;hovered='';
  layoutRail();render();place(position,true);
@@ -1091,11 +1227,21 @@ const mapStages=[
  ['Compare against MTU','Fits → send · DF clear → fragment · DF set → report error',5],
  ['Outgoing data link','Queue and wrap each outgoing datagram or fragment in Ethernet',6]
 ];
-for(const [name,hint,index] of mapStages){
- const el=button(name,()=>{$('map-dialog').close();choose('journey',0,index);});
- el.append(make('span',hint));$('map-stages').append(el);
-}
-$('router-map').onclick=()=>$('map-dialog').showModal();
+$('router-map').onclick=()=>{
+ const router=mode==='journey';
+ $('map-title').textContent=router?'R1 · Router map':modes[mode].name+' · Stage map';
+ $('map-description').textContent=router?'Follow the datagram through the router. Select a stage to jump there.':'Select a stage to jump there, inspect its fields, and open the explanation.';
+ const entries=router?mapStages:current().steps.map((st,n)=>[st.title,st.description,n]);
+ $('map-stages').replaceChildren(...entries.map(([name,hint,n])=>{
+  const el=button(name,()=>{
+   $('map-dialog').close();
+   if(router)choose('journey',0,n);
+   else{place(n,true);inspectStage($('router-map'));}
+  });
+  el.append(make('span',hint));return el;
+ }));
+ $('map-dialog').showModal();
+};
 for(const [id,name] of tabs)$('lab-list').append(button(name,()=>{$('lab-dialog').close();choose(id);}));
 $('down').onclick=()=>choose('encap',0,6-layer);
 $('up').onclick=()=>choose('encap',1,layer);
@@ -1139,7 +1285,7 @@ canvas.onlostpointercapture=()=>{drag=null;};
 canvas.onpointerup=()=>{
  const inspect=drag?.near&&!drag.axis;
  drag=null;
- if(inspect)openLesson(activeLesson(),$('inspect-more'));
+ if(inspect)inspectStage($('inspect-more'));
 };
 canvas.onpointercancel=()=>{drag=null;};
 function line(a,b,color,width=1){
