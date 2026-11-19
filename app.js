@@ -468,7 +468,7 @@ function box(x,y,w,h,r,fill,stroke){
  if(stroke){ctx.strokeStyle=stroke;ctx.lineWidth=1;ctx.stroke();}
 }
 function label(text,x,y,color='#aeaeae',size=11,align='center',maxWidth){
- ctx.textAlign=align;ctx.textBaseline='middle';ctx.font=size+'px monospace';ctx.fillStyle=color;if(maxWidth!==undefined)ctx.fillText(text,x,y,maxWidth);else ctx.fillText(text,x,y);
+ ctx.textAlign=align;ctx.textBaseline='middle';ctx.font=size+'px system-ui, sans-serif';ctx.fillStyle=color;if(maxWidth!==undefined)ctx.fillText(text,x,y,maxWidth);else ctx.fillText(text,x,y);
 }
 function tile(x,y,width,height,title,detail,active){
  box(x-width/2,y-height/2,width,height,5,active?'#303030':'#191919',active?'#909090':'#525252');
@@ -477,7 +477,7 @@ function tile(x,y,width,height,title,detail,active){
  label(detail,x,y+9,'#b5b5b5',compact?10:12,'center',width-18);
 }
 function token(x,y,text,color='#5b5b5b',primary=false){
- ctx.font='12px monospace';const width=ctx.measureText(text).width+21;
+ ctx.font='12px system-ui, sans-serif';const width=ctx.measureText(text).width+21;
  ctx.shadowBlur=primary?15:0;ctx.shadowColor='#464646';
  box(x-width/2,y-13,width,26,3,'#222222',color);
  ctx.shadowBlur=0;label(text,x,y,'#f3f3f3',12);
