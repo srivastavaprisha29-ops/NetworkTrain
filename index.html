@@ -260,7 +260,138 @@ function button(text,action,selected,cls){
  if(selected!==undefined)el.setAttribute('aria-pressed',selected);
  return el;
 }
-const tabs=[['journey','Packet journey'],['encap','OSI encapsulation'],['unicast','Unicast'],['multi','Multicast'],['broadcast','Broadcast'],['arp','ARP'],['forward','Forwarding'],['switch','Switching'],['route','Routing protocols']];
+const upperLayers={tcp:3,udp:3,application:6,dhcp:6,dns:6,http:6};
+const endpoints=['A','B'];
+const endpointLink=[['A','B']];
+function exchange(label,steps,aliases={},visible=endpoints,links=endpointLink,names={}){
+ return {...option(label,steps,visible,links,aliases),names:{A:'Client',B:'Server',...names}};
+}
+function wire(title,description,from,to,message,headers,fields=[],operations=[]){
+ return step(title,description,[send(from,to,message,'#929292')],operations,fields,headers);
+}
+const tcpHeaders=['Ethernet','IPv4 · 6','TCP segment'];
+const udpHeaders=['Ethernet','IPv4 · 17','UDP datagram'];
+const tcp=(title,desc,from,to,flag,seq,ack,data=0)=>wire(title,desc,from,to,flag,tcpHeaders,[
+ ['Sequence',seq],['Acknowledgment',ack??'ACK flag clear'],['Data',data+' bytes'],['Flags',flag],
+ ['Sequence space used',data+Number(/SYN|FIN/.test(flag))],
+ ['Port pair',from==='A'?'51514 → 80':'80 → 51514']
+]);
+lab('tcp','TCP','Follow sequence numbers, acknowledgments and the connection in both directions.',[
+ exchange('Handshake',[
+ tcp('Client opens the connection','SYN advertises the client’s initial sequence number. SYN uses one sequence number.','A','B','SYN',1000),
+ tcp('Server acknowledges and synchronizes','The server acknowledges 1001 and supplies its own initial sequence number.','B','A','SYN + ACK',7000,1001),
+ tcp('Client confirms','ACK 7001 completes the ordinary handshake. This pure ACK consumes no sequence space.','A','B','ACK',1001,7001)
+ ],{A:'Active open · 51514',B:'Passive open · 80'}),
+ exchange('Data and ACKs',[
+ tcp('Send the first 1,000 bytes','The segment begins at byte 1001 and covers through byte 2000.','A','B','ACK',1001,7001,1000),
+ tcp('Send the next 1,000 bytes','This segment starts at byte 2001. The receiving process will see an ordered stream.','A','B','ACK',2001,7001,1000),
+ tcp('Acknowledge cumulatively and send data','The server acknowledges both segments with ACK 3001 while sending 2000 bytes in the other direction.','B','A','ACK',7001,3001,2000),
+ tcp('Acknowledge server data','The next server byte expected is 9001. Each direction has an independent sequence space.','A','B','ACK',3001,9001)
+ ]),
+ exchange('Loss and recovery',[
+ tcp('A segment is lost','Sequence 1001 does not reach the receiver.','A','B','ACK',1001,7001,1000),
+ tcp('Later bytes expose the gap','The next segment begins at 2001. The receiver still expects byte 1001.','A','B','ACK',2001,7001,1000),
+ tcp('Receiver reports the gap','The cumulative ACK stays at 1001 until the missing range arrives.','B','A','ACK',7001,1001),
+ tcp('Retransmit the missing range','A retransmission timeout or an applicable loss signal causes TCP to resend the range.','A','B','ACK',1001,7001,1000),
+ tcp('Advance the cumulative ACK','Assuming the receiver buffered the later bytes, the next expected byte is now 3001.','B','A','ACK',7001,3001)
+ ]),
+ exchange('Close and half-close',[
+ tcp('Client closes its sending direction','FIN consumes one sequence number. The other direction can still send.','A','B','FIN + ACK',3001,9001),
+ tcp('Server acknowledges the FIN','The server can keep sending after acknowledging the client’s FIN.','B','A','ACK',9001,3002),
+ tcp('Server closes independently','The server sends FIN when its application finishes sending. It may combine this FIN with the previous ACK when ready.','B','A','FIN + ACK',9001,3002),
+ tcp('Client acknowledges the final FIN','In this ordinary active close, the client enters TIME-WAIT after acknowledging the server’s FIN.','A','B','ACK',3002,9002)
+ ])
+],[['Connection states','An active open starts with SYN. A passive opener listens. A normal close uses FIN and ACK, a half-close leaves one direction open, and RST rejects or aborts a connection.']]);
+lab('udp','UDP','Read datagram fields, then trace delivery to the destination process.',[
+ exchange('Request and reply',[
+ wire('Encapsulate a request','UDP adds its eight-byte header. There is no transport handshake.','A','B','UDP request',udpHeaders,[['Source port','52100'],['Destination port','53'],['UDP length','28 bytes'],['Payload','20 bytes']]),
+ wire('Demultiplex and respond','The receiver uses the destination port to find the DNS socket. The reply swaps the ports in this exchange.','B','A','UDP reply',udpHeaders,[['Source port','53'],['Destination port','52100']])
+ ],{A:'Ephemeral port 52100',B:'DNS · UDP 53'}),
+ exchange('Decode the slide header',[
+ wire('Read four 16-bit fields','Split the hexadecimal header at four-digit boundaries.','A','B','UDP header',udpHeaders,[['Hex','CB84 000D 001C …'],['Source','0xCB84 = 52100'],['Destination','0x000D = 13'],['Length','0x001C = 28 bytes'],['Data length','28 − 8 = 20 bytes'],['Likely direction','Client → server'],['Destination service','Daytime · UDP 13'],['Checksum','Fourth 16-bit word']])
+ ]),
+ exchange('Checksum and drop',[
+ wire('Calculate the checksum','The checksum covers the UDP header, data and IP pseudoheader. The pseudoheader is included in the calculation only.','A','B','UDP datagram',udpHeaders,[['Pseudoheader','Source IP, destination IP, protocol 17, UDP length'],['Arithmetic','16-bit one’s-complement addition; pad odd data for calculation']]),
+ step('Handle an invalid datagram','The receiver discards a datagram with a bad checksum. UDP itself neither sends an ACK nor retransmits it.',[],[['Recovery','An application can implement timeout and retry if needed.']],[['Delivery','Discard']],udpHeaders)
+ ])
+],[['Best fits','Independent short queries, applications implementing their own reliability, and latency-sensitive traffic can use UDP. UDP supplies neither a flow window nor ordered retransmission.']]);
+lab('application','Application layer','See how application processes use sockets and serve one or several clients.',[
+ exchange('Iterative server',[
+ wire('First client requests service','The server receives the first request and services it before moving on to the next queued request.','A','B','Request A',['IP','UDP','Application request']),
+ wire('Second request waits','With iterative service, requests are processed one at a time. A second request can wait in a queue.','C','B','Request C',['IP','UDP','Application request']),
+ wire('Complete the first request','The server returns the first result and then can handle the next request.','B','A','Response A',['IP','UDP','Application response']),
+ wire('Complete the second request','The same service can now reply to the second client.','B','C','Response C',['IP','UDP','Application response'])
+ ],{B:'One request at a time'},['A','B','C'],[['A','B'],['C','B']],{C:'Client C'}),
+ exchange('Concurrent server',[
+ step('Accept clients concurrently','A listening server delegates distinct connections to workers or handles them through concurrent I/O.',[send('A','B','Connection A','#989898'),send('C','B','Connection C','#777777')],[['Socket API','Listen and accept on the server; connect on the client.']],[['Server port','Same listening port'],['Connections','Different remote IP/port pairs']],['IP','TCP','Application']),
+ step('Respond independently','One client can receive a response while the other connection is still in progress.',[send('B','A','Response A','#989898'),send('B','C','Response C','#777777')],[],[],['IP','TCP','Application'])
+ ],{B:'Multiple connections'},['A','B','C'],[['A','B'],['C','B']],{C:'Client C'})
+],[['Client–server roles','The client initiates a service request. The server makes a service available. A socket API is the interface to the transport services.']]);
+const dhcpWire=(name,desc,from,to,fields)=>wire(name,desc,from,to,name,['Ethernet','IPv4','UDP','DHCP'],fields);
+const dora=[
+ dhcpWire('DHCPDISCOVER','The unconfigured client broadcasts to find available servers.','A','B',[['IPv4','0.0.0.0 → 255.255.255.255'],['UDP','68 → 67'],['xid','0x13a9c420']]),
+ dhcpWire('DHCPOFFER','The server proposes an address, lease and configuration options.','B','A',[['UDP','67 → 68'],['yiaddr','192.0.2.40'],['Lease','8 hours']]),
+ dhcpWire('DHCPREQUEST','During initial selection the client broadcasts its choice so other servers can withdraw their offers.','A','B',[['Requested address','192.0.2.40'],['Server identifier','192.0.2.2']]),
+ dhcpWire('DHCPACK','The client accepts the lease and configuration upon a valid acknowledgment. Server replies may be broadcast or unicast depending on state and flags.','B','A',[['Address','192.0.2.40/24'],['Default gateway','192.0.2.1'],['DNS','192.0.2.53'],['Lease','8 hours']])
+];
+lab('dhcp','DHCP','Follow address acquisition, relay and lease transitions.',[
+ exchange('DORA',dora,{A:'Initially 0.0.0.0',B:'UDP 67'}),
+ exchange('Across a relay',[
+ dhcpWire('Discover locally','The client’s limited broadcast stays on its local network. A relay hears it.','A','R1',[['UDP','68 → 67'],['Destination','255.255.255.255']]),
+ dhcpWire('Relay to remote server','The relay fills giaddr to identify the client subnet and forwards to the server.','R1','B',[['giaddr','192.0.2.1'],['UDP','67 → 67']]),
+ dhcpWire('Return offer to relay','The server uses giaddr to return the offer to the relay.','B','R1',[['yiaddr','192.0.2.40'],['giaddr','192.0.2.1']]),
+ dhcpWire('Deliver offer locally','The relay delivers the offer on the client’s network. The selected REQUEST and ACK follow the same relay relationship.','R1','A',[['UDP','67 → 68']])
+ ],{},['A','R1','B'],[['A','R1'],['R1','B']],{R1:'DHCP relay'}),
+ exchange('Renew, rebind or expire',[
+ dhcpWire('Renew at T1','At the default 50% point, the bound client usually unicasts DHCPREQUEST to its original server.','A','B',[['State','RENEWING'],['T1','4 h for an 8 h lease']]),
+ dhcpWire('Rebind at T2 if unanswered','At the default 87.5% point, the client broadcasts DHCPREQUEST to any available server.','A','B',[['State','REBINDING'],['T2','7 h for an 8 h lease']]),
+ step('Lease expires if still unanswered','The client must stop using the address and restart initialization. A valid ACK before expiry can extend the lease.',[],[],[['State','INIT']],['DHCP lease state'])
+ ])
+],[['Configuration and message format','DHCP supplies address, mask, gateway and DNS. Reservations bind an address to a client, and pools allocate leases dynamically. Its BOOTP-derived layout carries op, hardware metadata, hops, xid, seconds, flags, ciaddr, yiaddr, siaddr, giaddr, chaddr, server name, boot filename and options.'],['Other transitions','NAK can force restart, DECLINE reports an address conflict, RELEASE returns a lease early, and INFORM requests options for a configured address. DHCP retransmits after timeout. TFTP can retrieve a separately named boot file.']]);
+const dnsWire=(name,desc,from,to,fields)=>wire(name,desc,from,to,name,['IP','UDP or TCP · 53','DNS'],fields);
+lab('dns','DNS','Follow referrals, cache hits and reverse lookup, then inspect the message.',[
+ exchange('Resolve a name',[
+ dnsWire('Client asks recursive resolver','The stub sets RD and asks for the IPv4 address of www.example.com. This resolver has no cached answer.','A','R1',[['QNAME','www.example.com.'],['QTYPE / class','A / IN'],['Flags','QR=0, RD=1']]),
+ dnsWire('Ask a root server','The recursive resolver issues an iterative query. The root refers it to .com name servers.','R1','R2',[['Authority','NS for .com'],['Additional','Applicable glue addresses']]),
+ dnsWire('Follow the root referral','The resolver asks a .com server and learns the authoritative servers for example.com.','R1','ALT',[['Authority','NS for example.com']]),
+ dnsWire('Ask the authoritative server','The resolver requests the host record from the server authoritative for example.com.','R1','B',[['Question','www.example.com. IN A']]),
+ dnsWire('Return the authoritative answer','The server returns an A record and a TTL. The resolver can cache it.','B','R1',[['Answer','203.0.113.20'],['TTL','300 s'],['Flags','AA=1 on this reply']]),
+ dnsWire('Reply to the client','The recursive resolver returns the result to its client. The client can now connect to the destination.','R1','A',[['Answer','203.0.113.20'],['Flags','QR=1, RA=1']])
+ ],{},['A','R1','R2','ALT','B'],[['A','R1'],['R1','R2'],['R1','ALT'],['R1','B']],{A:'Stub client',R1:'Resolver',R2:'Root',ALT:'.com TLD',B:'Authoritative'}),
+ exchange('Cache and reverse DNS',[
+ dnsWire('Ask for a cached address','The resolver can answer from a cached positive record while its TTL remains valid.','A','B',[['QTYPE','A'],['QNAME','www.example.com.']]),
+ dnsWire('Return cached result','A cached response need not contact the authority again. The remaining TTL is returned.','B','A',[['Answer','203.0.113.20'],['Remaining TTL','240 s']]),
+ dnsWire('Ask for a reverse mapping','Reverse IPv4 octets and append in-addr.arpa, then query PTR.','A','B',[['QNAME','20.113.0.203.in-addr.arpa.'],['QTYPE','PTR']]),
+ dnsWire('Return a name if configured','A PTR result depends on the reverse zone’s records. It is separately maintained from the forward mapping.','B','A',[['Example PTR','www.example.com.']])
+ ],{},endpoints,endpointLink,{B:'Resolver'})
+],[['Message and records','The 12-byte header has ID, flags and four counts. Questions carry QNAME, QTYPE and QCLASS. Resource records carry name, type, class, TTL, RDLENGTH and RDATA. A compression pointer uses leading bits 11 and a 14-bit message offset.'],['Transport','DNS uses port 53 over UDP and TCP. A truncated UDP response can lead to retry over TCP. Full zone transfers use TCP. The historical inverse-query opcode shown in the slides differs from modern PTR lookup.']]);
+const http=(name,desc,from,to,message,fields)=>wire(name,desc,from,to,message,['IP','TCP','HTTP/1.1'],fields);
+lab('http','HTTP','Follow request lines, response headers, connections, cookies and cache validation.',[
+ exchange('Request a page',[
+ http('Send a request','The browser sends a GET request on an established connection. The blank line ends the headers.','A','B','GET /index.html',[['Request line','GET /index.html HTTP/1.1'],['Host','example.com'],['Body','None in this request']]),
+ http('Return a representation','The server replies with a status line, headers, blank line and the HTML body.','B','A','200 OK',[['Status line','HTTP/1.1 200 OK'],['Content-Type','text/html'],['Body','HTML referring to an image']]),
+ http('Reuse the connection for an image','HTTP/1.1 is persistent by default when message framing and connection settings permit reuse.','A','B','GET /image.png',[['Host','example.com'],['Connection','Same TCP connection']]),
+ http('Return the image','The server can handle a further request over the connection before closing it.','B','A','200 OK',[['Content-Type','image/png']])
+ ],{B:'Origin server · TCP 80'}),
+ exchange('Cookies and conditional requests',[
+ http('Server sets a cookie','HTTP requests are independent. A server can give the browser an identifier to return in later requests.','B','A','Set-Cookie',[['Set-Cookie','session=example; Path=/'],['Status','200 OK']]),
+ http('Browser sends cookie and validator','The browser sends the stored cookie when rules permit and asks whether the cached representation changed.','A','B','Conditional GET',[['Cookie','session=example'],['If-None-Match','"v1"']]),
+ http('Validate the cached copy','If the validator matches, the server returns 304 and no response body. The client can reuse its cached representation.','B','A','304 Not Modified',[['Status','304'],['Response body','None']])
+ ]),
+ exchange('Nonpersistent connections',[
+ http('Fetch the base page','In this classic nonpersistent model, the client opens a TCP connection for the request, then the connection closes after the response.','A','B','GET page',[['Connection','TCP connection 1'],['Illustrative latency','1 RTT handshake + 1 RTT request/first response + transmission']]),
+ http('Fetch the embedded object','The client opens a separate TCP connection for the embedded object. This example is sequential.','A','B','GET image',[['Connection','TCP connection 2'],['Setup overhead','Another TCP handshake']])
+ ])
+],[['Message syntax and methods','Request line: method, target, version. Response line: version, status, reason phrase in HTTP/1.1. Methods include GET, HEAD, POST, PUT, DELETE, OPTIONS, TRACE and CONNECT. Status families span 1xx to 5xx.'],['Web documents and caches','Static documents are stored representations, dynamic documents are generated at request time, and active documents run code at the client. A cache or proxy can serve fresh stored responses and revalidate stale responses.']]);
+
+modes.application.options.push(exchange('Open a website',[
+ wire('1 · Get network settings','A new client uses DHCP to obtain an address, default gateway and DNS resolver. Move to the DHCP lab for all four DORA messages.','A','R1','DHCP',['Ethernet','IPv4','UDP · 67/68','DHCP'],[['Client address after ACK','192.0.2.40'],['Resolver','192.0.2.53']]),
+ wire('2 · Resolve the web server name','The client asks its configured DNS resolver for an address. The answer tells it which IP to connect to.','A','R2','DNS A query',['IP','UDP · 53','DNS'],[['Name','www.example.com.'],['Answer IP','203.0.113.20']]),
+ wire('3 · Open a TCP connection','The TCP handshake synchronizes sequence numbers between the client and the web server. The TCP lab shows SYN, SYN+ACK, and ACK separately.','A','B','TCP handshake',['IP','TCP'],[['Destination','203.0.113.20:80']]),
+ wire('4 · Send an HTTP request','The browser writes a GET request to the established TCP byte stream. This example uses HTTP/1.1 without TLS.','A','B','HTTP GET',['IP','TCP','HTTP/1.1'],[['Request','GET / HTTP/1.1'],['Host','www.example.com']]),
+ wire('5 · Read the response','The server replies with a status, headers and the representation. The browser can issue more requests on the reusable connection.','B','A','200 OK',['IP','TCP','HTTP/1.1'],[['Content-Type','text/html']])
+ ],{A:'192.0.2.40 after DHCP',R1:'UDP 67',R2:'192.0.2.53',B:'203.0.113.20'},['A','R1','R2','B'],[['A','R1'],['A','R2'],['A','B']],{R1:'DHCP server',R2:'DNS resolver',B:'Web server'}));
+const tabs=[['journey','Packet journey'],['encap','OSI encapsulation'],['unicast','Unicast'],['multi','Multicast'],['broadcast','Broadcast'],['arp','ARP'],['forward','Forwarding'],['switch','Switching'],['route','Routing protocols'],['tcp','TCP'],['udp','UDP'],['application','Application layer'],['dhcp','DHCP'],['dns','DNS'],['http','HTTP']];
 const rnodes={
  A:[0,0,'Host A','192.0.2.10'],I:[580,0,'Ingress','Ethernet / PHY'],V:[790,0,'Validate IPv4','Length · version · checksum'],
  F:[1025,0,'Next-hop lookup','Destination → prefix → interface'],H:[1250,0,'Update IPv4','TTL · header checksum'],
@@ -307,6 +438,12 @@ modes.journey.options=[
 ];
 modes.journey.subtitle='Drag the packet to follow the forwarding path.';
 const refs=[
+ ['Transport Layer 1 · UDP','Ports, sockets, user-datagram format, checksum, queues, multiplexing and applications.'],
+ ['Transport Layer 2 · TCP','Byte stream, buffers, segment fields, sequence and ACK examples, setup, transfer and termination.'],
+ ['CNP Chapter 17 · Application','Client–server design, iterative and concurrent service, socket interfaces.'],
+ ['CNP Chapter 18 · DHCP','Configuration, BOOTP, relay, message layout, allocation and lease states.'],
+ ['CNP Chapter 19 · DNS','Hierarchy, zones, delegation, resolution, records, flags, compression and transport.'],
+ ['HTTP 2025','Web documents, request and response formats, persistence and cookies.'],
  ['Switching PPT · slide 34','Router forwarding diagram: validation, routing table, ARP, MTU and ingress/egress data link layers.'],
  ['Delivery and Forwarding PPTX and PPT','Next-hop selection, CIDR, prefix aggregation and delivery.'],
  ['Routing Protocols PPTs · both copies','RIP, OSPF and BGP packet exchanges.'],
@@ -463,6 +600,71 @@ lesson('arp-legacy','ARP','Proxy ARP, RARP and four routing cases','ARP deck · 
  ['Host to local host → resolve host IP','Host to gateway → resolve gateway IP','Router to router → resolve next router IP','Final router to host → resolve destination IP'],
  'A proxy answers who-has 141.23.56.21 with the proxy’s own MAC. The sender uses that MAC in its frame, and the proxy forwards the IP packet.',
  [['What replaced RARP?','BOOTP and later DHCP provide host configuration, including an IPv4 address.'],['Does proxy ARP change the IP destination?','The destination remains the original target IP. The frame’s destination is the proxy MAC.']]);
+const upperStudy=[
+ ['tcp','Transport','TCP connection and byte stream','TCP slides 2–28, 38–58, 63–72',
+ 'TCP offers a reliable, ordered, full-duplex byte stream between two endpoints. Sequence numbering is per byte and independent in each direction.',
+ ['Open with SYN → SYN+ACK → ACK','Buffer bytes and form segments','Acknowledge the next expected byte','Retransmit missing data','Close each direction with FIN or abort with RST'],
+ 'With client ISN 1000, SYN uses 1000. A 1000-byte segment begins at 1001 and next ACK is 2001. A pure ACK takes no sequence space.',
+ [['How many sequence numbers do SYN and FIN consume?','One each, plus any data bytes the segment carries.'],['How does half-close work?','One endpoint sends FIN and stops sending data. It can still receive bytes and acknowledge the other direction.'],['Does TCP preserve write boundaries?','It delivers a stream. The application decides how to frame messages.']],
+ [['Sequence number','Number of the first data byte in the segment, or a control sequence number for SYN or FIN.','Read the Sequence field in the handshake lab.'],['Acknowledgment number','Next byte expected in the opposite direction.','ACK 3001 cumulatively confirms receipt through byte 3000.'],['ISN','Initial sequence number selected by one TCP endpoint.','Client 1000 and server 7000 are independent values.'],['SYN','TCP flag used to synchronize sequence numbers.','One SYN consumes one sequence number.'],['FIN','TCP flag closing one sending direction.','The peer can continue sending after a FIN.'],['RST','TCP flag used to reject or abort a connection.','An attempted connection to a closed port can receive a reset.'],['Half-close','Closing one direction of a full-duplex transport connection.','Try the Close and half-close sequence.'],['Full duplex','Communication in both directions at the same time.','Each TCP direction has a separately numbered byte stream.']]],
+ ['tcp-fields','Transport','TCP header, windows and buffering','TCP slides 7–15, 28–37, 59–62',
+ 'The minimum TCP header is 20 bytes. Data offset gives header length in 32-bit words. The advertised receive window protects the receiver, and the congestion window limits flight size according to network conditions.',
+ ['Read ports and sequence fields','Use data offset to locate payload','Read flags and advertised receive window','Validate checksum with IP pseudoheader','Deliver bytes in order from receive buffer'],
+ 'Data offset 8 means 32 header bytes and 12 bytes of options and padding. With rwnd 4000 and cwnd 3000, at most 3000 bytes may be in flight before accounting for bytes already outstanding.',
+ [['Which fields follow ports and sequence numbers?','Data offset, reserved bits, flags, receive window, checksum, urgent pointer and optional fields.'],['How are flow and congestion control different?','The receive window represents receiver capacity. The congestion window responds to network conditions.'],['What are PSH and URG?','PSH is a push indication for prompt delivery. URG says the urgent pointer is meaningful. They serve different purposes.']],
+ [['Data offset','TCP header size in 32-bit words.','Offset 5 denotes the 20-byte minimum.'],['Flow control','Limiting sent data according to receiver capacity.','The receiver advertises available window space.'],['Congestion control','Limiting network load according to congestion signals.','The congestion window may be smaller than the receive window.'],['Receive window (rwnd)','Advertised space available to receive data.','A receiver with limited buffering can advertise a small window.'],['Congestion window (cwnd)','Sender-side limit based on network congestion.','Usable sending is constrained by both cwnd and rwnd.'],['TCP checksum','Error detection over TCP header, data and an IP pseudoheader.','A recipient discards a corrupted TCP segment.'],['PSH','TCP push flag associated with prompt delivery of buffered data.','It does not create application message boundaries.'],['URG','TCP flag that makes the urgent pointer meaningful.','Urgent data is part of the TCP sequence space.']]],
+ ['udp','Transport','UDP ports, header and checksum','UDP slides 2–45',
+ 'UDP is a connectionless transport for independent datagrams. It multiplexes applications using ports and offers checksum-based error detection without built-in retransmission or ordering.',
+ ['Select source and destination ports','Add the 8-byte UDP header','Compute checksum using the IP pseudoheader','Pass datagram to IP','Validate and demultiplex using destination socket'],
+ 'CB84 000D 001C … gives source 52100, destination 13, total 28 bytes, payload 20 bytes and Daytime as the destination service. The fourth word is the checksum.',
+ [['Why are IP and port both needed?','IP reaches the host interface. The transport port helps select the process endpoint.'],['How is an odd-length checksum input handled?','A zero byte pads the calculation only. The pad is not added to the UDP length.'],['What happens when UDP receives corrupted data?','A failing checksum causes discard. The application may implement a timeout and retry.']],
+ [['UDP datagram','UDP header plus a single application payload.','The request and reply are independently delivered.'],['Port number','16-bit transport identifier for an endpoint.','DNS commonly receives queries on port 53.'],['Ephemeral port','A temporary local transport port typically chosen for a client.','The response returns to the original source port.'],['Port ranges','System 0–1023, registered 1024–49151, and dynamic/private 49152–65535.','An operating system may choose its own ephemeral allocation range.'],['Socket address','An IP address and port identifying a transport endpoint.','203.0.113.20:53 identifies an example DNS endpoint in a given transport.'],['Pseudoheader','IP-derived fields included only in transport checksum computation.','It is not transmitted as an extra UDP header.'],['UDP length','Combined UDP header and payload length in bytes.','A length of 28 leaves 20 data bytes.'],['Multiplexing','Combining traffic from several application endpoints into transport delivery.','Ports distinguish the sources of concurrent messages.'],['Demultiplexing','Delivering incoming traffic to the correct endpoint.','The receiving transport uses socket information to select the process.']]],
+ ['application','Application','Client/server design and socket interfaces','Application slides 2–9',
+ 'A client initiates a service request and a server makes a service available. The socket interface lets an application use transport services through the operating system.',
+ ['Client obtains an endpoint','Server binds a known endpoint','Choose iterative or concurrent service','Send and receive through the socket interface'],
+ 'A TCP server can accept connections from two clients on one listening port. Each accepted connection has its own pair of endpoints.',
+ [['Is concurrent service the same as TCP?','Concurrency is a server design choice. The deck pairs common iterative connectionless and concurrent connection-oriented examples.'],['Can a host run two clients at once?','Yes. Their transport endpoints distinguish the exchanges.']],
+ [['Client','Process that initiates a request for service.','A browser requests a representation.'],['Server','Process that provides a service to clients.','An HTTP origin answers requests.'],['Iterative server','A server that handles one request at a time.','Later requests can wait while it services the first.'],['Concurrent server','A server that can have multiple requests or connections in progress.','A slow client need not block service to another.'],['Socket interface','An operating-system API for accessing network communication.','Typical operations include bind, connect, listen, accept, send and receive.']]],
+ ['dhcp','Application','DHCP allocation and leases','DHCP slides 2–34',
+ 'DHCP configures the client with an address, mask, gateway and DNS resolver. A static reservation maps a client to a configured address. A dynamic lease assigns an address for a finite period.',
+ ['INIT sends Discover','SELECTING receives offers','REQUESTING chooses an offer','BOUND after ACK','RENEWING at T1 → REBINDING at T2 if unanswered → INIT on expiry'],
+ 'An eight-hour lease normally renews after four hours and rebinds after seven. A relay fills giaddr so a remote server knows the client subnet.',
+ [['Why start at 0.0.0.0?','The client has no configured IPv4 address yet. It can transmit a limited broadcast locally.'],['Why use a relay?','A limited broadcast does not cross a router. The relay forwards a request to a remote server and returns replies to the client subnet.'],['How do RARP, BOOTP and DHCP relate?','RARP supplied an address from a hardware identity. BOOTP added boot configuration and relay support. DHCP extends BOOTP with lease-based allocation and more options.']],
+ [['DHCPDISCOVER','Client message looking for DHCP servers.','An unconfigured client broadcasts from UDP 68 to 67.'],['DHCPOFFER','Server proposal of an address and configuration.','The proposed address appears in yiaddr.'],['DHCPREQUEST','Client message selecting, renewing, rebinding or validating an address.','Initial selection identifies the chosen server and is broadcast.'],['DHCPACK','Server confirmation of configuration or lease.','The client enters BOUND after accepting the selected configuration.'],['DHCPNAK','Server rejection of an invalid or inappropriate requested configuration.','The client can return to initialization.'],['DHCPDECLINE','Client report that an offered address is already in use.','The server can mark that address unavailable.'],['DHCPRELEASE','Client notice returning a lease early.','The server can reclaim the address.'],['DHCPINFORM','Client request for options when it already has an address.','A locally configured host can request additional settings.'],['Lease and T1/T2','Lease is the permitted use interval. T1 and T2 are renewal and rebinding points.','Defaults are typically 50% and 87.5% unless supplied otherwise.'],['DHCP relay','Agent linking a client LAN to a remote DHCP server.','giaddr identifies the client subnet in the base relay scenario.'],['DHCP transaction ID (xid)','Field correlating request and reply messages.','The client looks for a response matching its exchange.'],['ciaddr, yiaddr, siaddr, giaddr','Client address, offered client address, next-server address and relay address fields.','Inspect yiaddr on Offer and giaddr in the relay scenario.'],['DHCP broadcast flag','A client indication that it needs a broadcast reply under applicable conditions.','It can matter before the IP stack is configured.'],['BOOTP and TFTP','BOOTP is a predecessor to DHCP. TFTP can retrieve a separately specified boot file.','Configuration can name a boot server and filename.']]],
+ ['dns','Application','DNS names, delegation and resolution','DNS slides 2–45',
+ 'DNS distributes naming data across a hierarchy of authoritative servers. A client stub can request a recursive answer from a resolver, which typically follows iterative referrals and caches the result.',
+ ['Stub requests a name','Resolver checks cache','Root returns TLD referral','TLD returns delegated authority','Authority answers','Resolver caches and returns result'],
+ 'For www.example.com. the resolver can follow root → .com → example.com, then return an A record. With a valid cache entry it can skip those remote queries.',
+ [['Are domain and zone identical?','A domain is a subtree. A zone is the portion administered together, excluding separately delegated child zones.'],['Primary vs secondary?','Both can answer authoritatively. The primary has the maintained zone data. A secondary copies it through zone transfer.'],['How does reverse DNS work?','Reverse the IPv4 octets, append in-addr.arpa and query PTR. It is separate from forward naming.']],
+ [['Domain name space','The hierarchy of labels used in DNS.','A root label anchors TLDs and delegated domains.'],['Flat vs hierarchical naming','Flat names have no grouping structure. Hierarchical names express relationships through labels.','DNS uses hierarchical delegation to distribute administration.'],['Label','A component of a domain name.','example and com are separate labels.'],['FQDN','A name that specifies the entire hierarchy to the DNS root.','www.example.com. explicitly includes the final root dot.'],['PQDN','A partially qualified name that can require local completion.','A resolver may append a configured search suffix to a short hostname.'],['DNS zone','An administered part of the DNS hierarchy bounded by delegation.','A delegated child can have a separate zone and authoritative service.'],['Root, TLD and authoritative servers','Servers at the root, top-level domain and delegated zone stages.','A referral leads the resolver toward the authority that can answer.'],['Primary and secondary DNS','Authoritative servers with maintained source data and an authoritative transferred copy, respectively.','Either can answer from its own authoritative copy.'],['Recursive resolution','Providing a final answer or error on behalf of the requester.','The stub asks the recursive resolver to resolve the whole name.'],['Iterative resolution','Answering directly if possible or giving a referral to a server closer to the name.','The resolver follows the root’s TLD referral.'],['DNS cache TTL','Remaining permitted lifetime for a cached DNS record.','After expiry the resolver should refresh the record when needed.'],['Registrar','A service through which domain registrations are managed.','Registration and authoritative hosting can be supplied by different organizations.'],['Generic and country-code TLDs','Top-level namespaces such as .com and .in.','The first referral for example.com points toward .com.']]],
+ ['dns-message','Application','DNS message format and resource records','DNS slides 46 onward',
+ 'A DNS message has a 12-byte header followed by question, answer, authority and additional sections. Resource records carry typed data. Compression can reuse a previously encoded name.',
+ ['Match query to response with ID','Read QR, opcode and other flags','Decode question and section counts','Parse resource records and compression pointers','Retry with TCP when appropriate'],
+ 'DNS query flags 0x0100 set RD. A typical recursive response 0x8180 sets QR, RD and RA and has RCODE zero. A name pointer such as 0xC00C points to offset 12.',
+ [['What do A, AAAA and PTR carry?','A gives IPv4, AAAA gives IPv6, and PTR typically carries a name for reverse DNS.'],['What if a UDP response is truncated?','TC indicates truncation. The client can retry using TCP.'],['What are AA, RD, RA and RCODE?','Authoritative Answer, Recursion Desired, Recursion Available and response status code.']],
+ [['DNS header ID','Identifier used to associate a DNS response with its query.','The response includes the ID of the matching query.'],['DNS flag fields','QR, Opcode, AA, TC, RD, RA and RCODE describe how the message was sent and handled.','QR distinguishes query from response. TC can signal TCP retry.'],['DNS question record','QNAME, QTYPE and QCLASS specifying what the client asks.','www.example.com. IN A asks for an IPv4 address.'],['Resource record (RR)','Typed DNS data with name, type, class, TTL, RDLENGTH and RDATA.','An A record contains four address bytes.'],['A, AAAA, NS, CNAME, SOA, PTR and MX','Record types for IPv4, IPv6, name server, alias, zone authority, pointer and mail exchange.','MX supplies mail exchanger information and preference.'],['DNS compression pointer','A two-bit 11 prefix and 14-bit offset referencing a name in the same message.','C00C references byte offset 12.'],['Reverse DNS and PTR','Resolving an address to a name using a reverse namespace and pointer record.','203.0.113.20 maps to the lookup name 20.113.0.203.in-addr.arpa.'],['NXDOMAIN','DNS response code indicating the queried domain name does not exist.','It differs from an existing name that simply lacks the requested record type.']]],
+ ['http','Application','HTTP messages, documents and connections','HTTP deck · messages, documents, persistence',
+ 'HTTP exchanges requests and responses carrying representations. Classic HTTP/1.1 messages use a start line, headers, blank line and an optional body.',
+ ['Client identifies an origin and target','Open TCP or reuse an existing connection','Send request line and headers','Read response status and headers','Consume body and request embedded objects'],
+ 'GET /index.html HTTP/1.1 followed by Host: example.com can yield HTTP/1.1 200 OK and text/html. A referenced image usually requires its own request.',
+ [['What do 1xx through 5xx mean?','Informational, successful, redirection, client error and server error.'],['GET, HEAD and POST?','GET asks for a representation, HEAD requests corresponding headers without a response body, and POST submits data for processing.'],['How do persistent and nonpersistent connections differ?','Persistent connections can carry multiple exchanges. A classic nonpersistent connection closes after one exchange.']],
+ [['HTTP','Application protocol for exchanging requests and responses for web resources.','The browser sends GET and the origin answers.'],['URL','Identifier giving the scheme, authority and applicable path or other components.','https://example.com/catalog identifies a resource at that origin.'],['Request line','HTTP/1.1 start line with method, target and version.','GET /index.html HTTP/1.1.'],['Status line','HTTP/1.1 start line with version, status code and optional reason phrase.','HTTP/1.1 404 Not Found.'],['HTTP status code','Number describing how the request was handled.','200 is success, 304 is cache validation, and 404 means the resource was not found.'],['HTTP methods','Named request semantics such as GET, HEAD, POST, PUT, DELETE and OPTIONS.','GET retrieves a representation and PUT requests replacement of the target state.'],['Static, dynamic and active documents','Stored content, server-generated content and client-executed code in the slide classification.','A static HTML file, server-generated search results and a browser script illustrate the three.'],['Persistent connection','Connection that stays open for further request-response exchanges.','HTTP/1.1 defaults to persistence when the connection is reusable.'],['Nonpersistent connection','Connection closed after its request-response exchange.','A sequential fetch opens another TCP connection for the image.']]],
+ ['http-state','Application','HTTP cookies, caching and conditional requests','HTTP deck · cookies and conditional requests',
+ 'Cookies let a browser return server-provided state. HTTP caching can reuse a stored response when fresh and use a validator before reusing a stale response.',
+ ['Server sends Set-Cookie or cache validator','Browser stores applicable state','Later request sends Cookie or a conditional header','Server handles state or checks representation validator','304 reuses the cached representation; 200 can return new content'],
+ 'Request If-None-Match: "v1" yields 304 without a body if the selected representation still matches. A changed representation can yield 200 with new content.',
+ [['What is the difference between cookie and cache?','A cookie carries client-associated state back to a server. A cache stores reusable representations and metadata.'],['How does If-Modified-Since work?','A client submits a known modification time. The server can answer 304 when the representation has not changed since then.']],
+ [['Cookie and Set-Cookie','Set-Cookie supplies a cookie in a response. Cookie returns applicable stored values in a request.','A session identifier can be returned with later matching requests.'],['Conditional request','A request whose outcome depends on a validator or precondition.','If-None-Match checks an entity tag before sending the resource again.'],['ETag and Last-Modified','Validators based on an entity tag or a modification timestamp.','The client can use them for later cache revalidation.'],['304 Not Modified','Status indicating a conditional retrieval can use a previously stored representation.','The response has no message body.'],['Web cache and proxy','A cache stores reusable responses. A proxy is an intermediary and may include caching.','A fresh cache result can avoid a fetch from the origin.']]]
+];
+for(const [id,group,title,slides,summary,flow,example,questions] of upperStudy){
+ lesson(id,group,title,slides,summary,flow,example,questions);
+}
+const upperTopics={
+ tcp:['TCP exchange','TCP header and windows'],udp:['UDP datagram'],application:['Client and server'],
+ dhcp:['DHCP lease'],dns:['DNS resolution','DNS records'],http:['HTTP messages','HTTP state']
+};
+const upperConcepts={'TCP exchange':'tcp','TCP header and windows':'tcp-fields','UDP datagram':'udp','Client and server':'application','DHCP lease':'dhcp','DNS resolution':'dns','DNS records':'dns-message','HTTP messages':'http','HTTP state':'http-state'};
+
 const definitions=[
 ["Network layer", "The OSI layer that addresses and transfers packets across interconnected networks.", "The source creates the datagram, intermediate routers forward it, and the destination delivers its payload.", "sender"],
 ["Logical address", "An address used at the network layer to identify an interface or delivery destination.", "IPv4 uses the destination address in the datagram to choose a route.", "sender"],
@@ -635,6 +837,7 @@ const definitions=[
 ["NOTIFICATION", "A BGP message reporting an error before the session closes.", "It provides an error code and can include supporting detail.", "bgp"],
 ["KEEPALIVE", "A BGP message confirming the OPEN or maintaining an established session.", "It contains only the common BGP header.", "bgp"]
 ];
+for(const [id,...parts] of upperStudy) for(const entry of parts.at(-1)) definitions.push([...entry,id]);
 const conceptInfo={
  Encapsulation:['A layer wraps the payload with its own header. At this hop, Ethernet carries the IP datagram and adds the local MAC addresses.','encap'],
  Decapsulation:['A receiving layer removes its wrapper and passes the payload to the next layer.','encap'],
@@ -652,6 +855,8 @@ const conceptInfo={
  'Packet forwarding':['Forwarding moves packets from the incoming interface toward the selected outgoing interface.','forward']
 };
 function concepts(){
+ if(mode==='application'&&branch===2)return upperTopics[activeLesson()];
+ if(upperTopics[mode])return upperTopics[mode];
  if(mode==='encap')return [branch?'Decapsulation':'Encapsulation','IP delivery'];
  if(mode==='route')return [['RIP packet','Bellman–Ford'],['RIP packet','Bellman–Ford'],['Loop prevention','RIP timers'],['OSPF exchange','Dijkstra'],['OSPF LSAs','OSPF areas'],['BGP messages','Control plane']][branch];
  const list={unicast:['Unicast'],multi:['Multicast'],broadcast:['Broadcast'],arp:['ARP','Broadcast','Unicast'],forward:['Forwarding lookup','ARP'],switch:['Packet forwarding','Queue & transmit'],route:['Control plane','Forwarding lookup']};
@@ -661,7 +866,7 @@ function concepts(){
  return local[stage]||['Encapsulation','ARP','Unicast'];
 }
 const nodeLessons={A:'sender',I:'ingress',V:'validate',F:'forward',H:'ttl',N:'arp',M:'mtu',Frag:'mtu',ICMP:'mtu',Drop:'validate',O:'egress',R2:'forward',B:'destination'};
-const conceptLessons={'RIP packet':'rip','Bellman–Ford':'bellman','Loop prevention':'loop','RIP timers':'timers','OSPF exchange':'ospf',Dijkstra:'dijkstra','OSPF LSAs':'lsa','OSPF areas':'areas','BGP messages':'bgp',Encapsulation:'sender',Decapsulation:'ingress','IPv4 validation':'validate','Forwarding lookup':'forward','TTL & checksum':'ttl',ARP:'arp','MTU & fragmentation':'mtu','Queue & transmit':'egress','IP delivery':'destination',Unicast:'scope',Multicast:'scope',Broadcast:'scope','Control plane':'routing','Packet forwarding':'switching'};
+const conceptLessons={...upperConcepts,'RIP packet':'rip','Bellman–Ford':'bellman','Loop prevention':'loop','RIP timers':'timers','OSPF exchange':'ospf',Dijkstra:'dijkstra','OSPF LSAs':'lsa','OSPF areas':'areas','BGP messages':'bgp',Encapsulation:'sender',Decapsulation:'ingress','IPv4 validation':'validate','Forwarding lookup':'forward','TTL & checksum':'ttl',ARP:'arp','MTU & fragmentation':'mtu','Queue & transmit':'egress','IP delivery':'destination',Unicast:'scope',Multicast:'scope',Broadcast:'scope','Control plane':'routing','Packet forwarding':'switching'};
 const related={
  sender:['scope','arp','classful'],ingress:['validate','ttl'],validate:['forward','ttl'],forward:['classful','cidr','routing'],classful:['forward','cidr'],cidr:['forward','bgp'],
  ttl:['validate','mtu'],arp:['arp-cache','arp-legacy','scope','forward'],'arp-cache':['arp','arp-legacy'],'arp-legacy':['arp','arp-cache'],mtu:['ttl','egress','destination'],egress:['delay','switching'],destination:['mtu','arp'],
@@ -669,6 +874,9 @@ const related={
  rip:['loop','timers','scope'],loop:['rip','timers'],timers:['rip','loop'],dijkstra:['areas','ospf','bellman'],areas:['lsa','dijkstra'],ospf:['lsa','areas'],lsa:['ospf','areas'],bgp:['cidr','routing']
 };
 function activeLesson(){
+ if(mode==='http'&&branch===1)return 'http-state';
+ if(mode==='application'&&branch===2)return ['dhcp','dns','tcp','http','http'][index];
+ if(upperLayers[mode])return mode;
  if(mode==='journey')return branch===5||index===0?'sender':nodeLessons[currentStep().paths[0]?.to]||'sender';
  if(mode==='route'){
   if(branch<=1)return index===2?'bellman':'rip';
@@ -813,6 +1021,8 @@ function nav(){
   $('layers').replaceChildren(...layerNames.map((name,n)=>{
    const el=button(undefined,()=>{
     if(n===2){choose('journey');return;}
+    if(n===3){choose('tcp');return;}
+    if(n===6){choose('application');return;}
     const side=mode==='encap'?branch:0;
     choose('encap',side,side?n:6-n);
    },layer===n,'layer');
@@ -823,7 +1033,10 @@ function nav(){
 function branchControls(){
  const opts=current().steps;
  $('branches').replaceChildren();
- if(mode==='journey'&&branch<5){
+ if(upperLayers[mode]){
+  for(const [id,name] of tabs.filter(([id])=>upperLayers[id]===upperLayers[mode])) $('branches').append(button(name,()=>choose(id),mode===id));
+  for(const [n,o] of modes[mode].options.entries()) $('branches').append(button(o.label,()=>choose(mode,n),n===branch));
+ }else if(mode==='journey'&&branch<5){
   if(index<4&&branch===0){
    $('branches').append(button('Same subnet',()=>choose('journey',5)),button('Invalid header',()=>choose('journey',3,1)),button('Expired TTL',()=>choose('journey',4,3)));
   }else{
@@ -836,7 +1049,7 @@ function branchControls(){
 function render(){
  if(mode==='encap')layer=branch?index:6-index;
  const selected=modes[mode],st=currentStep(),steps=branchControls();
- $('section').textContent=mode==='encap'?'OSI / L'+(layer+1):'OSI / L3 / NETWORK';
+ $('section').textContent=mode==='encap'?'OSI / L'+(layer+1):'OSI / L'+(layer+1)+' / '+layerNames[layer].toUpperCase();
  $('title').textContent=selected.name;
  $('intro').textContent=selected.subtitle;
  $('step-title').textContent=st.title;
@@ -864,7 +1077,7 @@ function layoutRail(){
  $('rail').style.height='calc(100svh + '+Math.ceil(limit()*span)+'px)';
 }
 function choose(id,choice=0,at=0){
- closeLesson();mode=id;branch=choice;layer=2;position=Math.min(at,limit());index=Math.floor(position);
+ closeLesson();mode=id;branch=choice;layer=upperLayers[id]??2;position=Math.min(at,limit());index=Math.floor(position);
  $('scrub').max=limit();$('scrub').step=.002;
  $('concept-pop').hidden=true;hovered='';
  layoutRail();render();place(position,true);
@@ -1026,8 +1239,9 @@ function draw(){
   const [x,y]=pt(n),active=st.paths.some(path=>path.from===n||path.to===n);
   const width=Math.min(136,Math.max(60,w*.195));
   const detail=opt.aliases[n]??nodes[n][3];
-  tile(x,y,width,44,nodes[n][2],detail,active);
-  hotspot('generic-'+n,'Explain '+nodes[n][2]+' in this lab',activeLesson(),x,y,width,44);
+  const name=opt.names?.[n]??nodes[n][2];
+  tile(x,y,width,44,name,detail,active);
+  hotspot('generic-'+n,'Explain '+name+' in this lab',activeLesson(),x,y,width,44);
  });
  if(!p){token(w*.4,mid+45,'PDU','#5b5b5b',true);return;}
  st.paths.forEach((path,i)=>{
