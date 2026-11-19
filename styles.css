@@ -164,3 +164,23 @@ aside.inspector{width:310px;max-height:42%;padding:15px;border-radius:10px}
 @media(max-width:760px){header{padding:8px 10px;min-height:56px}.brand{font-size:16px}.layout{grid-template-columns:1fr}.layout>aside:first-child{padding:5px 8px}.layers .layer{font-size:12px;padding:5px 7px}.directions button{font-size:12px;padding:4px 8px}.overlay{left:12px;right:12px;top:10px}.overlay h1{font-size:29px}.overlay>.intro{font-size:13px;margin:5px 0 7px}.overlay .branches button{font-size:11px}.stage-heading h2{font-size:14px}#stage-track button{font-size:12px;min-height:40px}.controls button{font-size:11px}aside.inspector{width:min(290px,79vw);max-height:32%;padding:9px}.inspector h2{font-size:15px}.inspector p{font-size:12px}#lesson-drawer,#lesson-drawer.is-expanded{padding:15px}.drawer-body{font-size:15px}}
 .lesson-videos{margin:20px 0}
 .lesson-videos h3{margin-bottom:8px}
+
+/* Small labels use the reading face; literal packet values keep fixed-width digits. */
+:root{--reading-font:"Segoe UI",system-ui,-apple-system,sans-serif}
+.label,.live,.layer span,.field span,.stack span,.stage-context dt,.stage-context .packet-layers span{
+ font-family:var(--reading-font);
+ font-variant-numeric:tabular-nums;
+}
+.label{font-size:12px;letter-spacing:.035em;font-weight:650}
+.overlay>.intro,.inspector p,.card p{font-family:var(--reading-font);line-height:1.55}
+.inspector p,.card p{font-size:14px}
+.field{gap:10px;padding-block:6px}
+.field span,.field strong,.stack span,.stage-context dl{font-size:13px}
+.field strong{font-family:var(--reading-font);font-weight:600;font-variant-numeric:tabular-nums}
+.lesson-ref,.video-card small{font:13px/1.5 var(--reading-font)}
+.keyword-list button{font:600 13px/1.35 var(--reading-font)}
+.stage-heading small,.controls small{font-size:13px;letter-spacing:.015em}
+@media(max-width:760px){
+ .inspector p,.field span,.field strong,.stack span{font-size:12px}
+ .label,.stage-heading small{font-size:11px}
+}
