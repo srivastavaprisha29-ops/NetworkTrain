@@ -191,9 +191,6 @@ const upperStudy=[
  [['What is the difference between cookie and cache?','A cookie carries client-associated state back to a server. A cache stores reusable representations and metadata.'],['How does If-Modified-Since work?','A client submits a known modification time. The server can answer 304 when the representation has not changed since then.']],
  [['Cookie and Set-Cookie','Set-Cookie supplies a cookie in a response. Cookie returns applicable stored values in a request.','A session identifier can be returned with later matching requests.'],['Conditional request','A request whose outcome depends on a validator or precondition.','If-None-Match checks an entity tag before sending the resource again.'],['ETag and Last-Modified','Validators based on an entity tag or a modification timestamp.','The client can use them for later cache revalidation.'],['304 Not Modified','Status indicating a conditional retrieval can use a previously stored representation.','The response has no message body.'],['Web cache and proxy','A cache stores reusable responses. A proxy is an intermediary and may include caching.','A fresh cache result can avoid a fetch from the origin.']]]
 ];
-for(const [id,group,title,slides,summary,flow,example,questions] of upperStudy){
- lesson(id,group,title,slides,summary,flow,example,questions);
-}
 const lowerStudy=[
  ['physical','Physical','Physical signals and line coding','OSI model · Physical layer',
  'The physical layer represents bits as signals over a medium. The receiver recovers the bit stream using the agreed line code and timing.',
@@ -221,6 +218,9 @@ const lowerStudy=[
  [['Serialization','Converting a structured value into a representation for transport or storage.','An object can be serialized into JSON text.'],['Character encoding','A mapping between text characters and byte sequences.','UTF-8 encodes Unicode characters.'],['Compression','Representing data using fewer bytes when possible.','The receiver reverses an agreed lossless encoding such as gzip.'],['Encryption','Using a cryptographic transformation to protect data confidentiality.','A receiver with the required key can recover the protected plaintext.']]]
 ];
 upperStudy.push(...lowerStudy);
+for(const [id,group,title,slides,summary,flow,example,questions] of upperStudy){
+ lesson(id,group,title,slides,summary,flow,example,questions);
+}
 
 const upperTopics={
  physical:['Line coding','Link timing'],datalink:['Frames and ARQ','ARP'],session:['Session dialogue'],presentation:['Data representation'],
