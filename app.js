@@ -141,7 +141,64 @@ defContext.onclick=()=>{
  defGroup.value='';defSearch.value='';renderDefinitions();
 };
 
+const lessonVideos={
+ packets:['rYodcvhh7b8','How Packets Travel Through a Network','Practical Networking · Follow encapsulation, ARP, and Ethernet frames across routers.'],
+ arp:['QPi5Nvxaosw','Address Resolution Protocol in less than 5 minutes','Practical Networking · See the broadcast request and the unicast reply.'],
+ prefix:['9x_u839WDcs','Think Like a Router: Longest Prefix Match','Walk through competing prefixes and choose the most specific match.'],
+ subnet:['BWZ-MHIhqjM','What Is Subnetting?','Practical Networking · Build intuition for networks, prefixes, and boundaries.'],
+ fragment:['JDlJyjdAiLs','IP Datagrams, Fragmentation and Addressing','Follow the IP header, outgoing MTU, fragmentation, and reassembly.'],
+ switching:['-HlJ4psu5aU','Switching Techniques in Computer Networks','Neso Academy · Compare circuits, datagrams, and virtual circuits.'],
+ delay:['UUhHGzFBsmU','End-to-End Delay','Sumit Pundir · Separate transmission, propagation, processing, and queueing delay.'],
+ dv:['z-3cfz1g9Wc','Distance Vector Routing and Bellman–Ford','Work through distance estimates and updates between neighbors.'],
+ rip:['Z5LWEbIh-RY','Routing Information Protocol','Neso Academy · Review RIP as a distance-vector protocol.'],
+ ls:['Q31hToRHPvc','Link State Routing and Dijkstra’s Algorithm','Follow the shortest-path calculation in a routing example.'],
+ ospf:['_ThYOX1wX_4','OSPF Framework and Packet Types','Practical Networking · Compare the LSDB, LSAs and the five OSPF packet types.'],
+ lsa:['Wf755546JhA','The Types of OSPF LSAs','Practical Networking · Follow how different advertisements describe links and areas.'],
+ bgp:['MN9SbpW-lWk','Border Gateway Protocol Explained','Sikandar Shaik · Learn how BGP works between autonomous systems.'],
+ udp:['VjBDgcNno-Q','Connectionless Transport: UDP','Jim Kurose · Study UDP’s structure, demultiplexing, and checksum.'],
+ tcp:['JFch3ctY6nE','TCP: 12 Ideas Behind the Protocol','A technical walkthrough of TCP’s core mechanisms, including flow control.'],
+ handshake:['eKpOaRzUhMI','TCP Three-Way Handshake in Wireshark','Watch a real SYN, SYN-ACK, and ACK exchange in a packet capture.'],
+ dhcp:['e6-TaH5bkjo','DHCP Explained','PowerCert Animated Videos · Visualize how a host gets an IP configuration.'],
+ dns:['mpQZVYPuDGU','How a DNS Server Works','PowerCert Animated Videos · Trace recursive resolution and the DNS hierarchy.'],
+ records:['c8qZeKgkKok','DNS Record Types','Compare resource records and what each one represents.'],
+ http:['S9GEPaQ1lFs','The Web and HTTP, Part 1','Jim Kurose · Study requests, responses, and connection reuse.'],
+ cache:['IYHyw7j13yE','HTTP Cookies, Caching and Conditional GET','See how browsers maintain session state and revalidate cached responses.'],
+ line:['gwe3S_AFLEo','Digital-to-Digital Encoding','Compare NRZ, NRZI, Manchester, and bipolar AMI.'],
+ arq:['QD3oCelHJ20','Go-Back-N ARQ','Neso Academy · See why a sliding window changes retransmission behavior.'],
+ osi:['Tt8BTkxz_Vc','The OSI Model','Compare what each OSI layer does and how responsibilities fit together.'],
+ session:['Tt8BTkxz_Vc','OSI Model: Session Layer','Start at 6:05 for the discussion of application dialogues.',365],
+ presentation:['Tt8BTkxz_Vc','OSI Model: Presentation Layer','Start at 7:25 for the discussion of data representation.',445]
+};
+const videosByLesson={
+ sender:['packets'],ingress:['packets'],validate:['fragment'],forward:['prefix','packets'],classful:['subnet'],cidr:['subnet','prefix'],ttl:['fragment'],arp:['arp','packets'],'arp-cache':['arp'],'arp-legacy':['arp'],mtu:['fragment'],egress:['packets','delay'],destination:['packets'],
+ switching:['switching'],delay:['delay'],scope:['packets','arp'],routing:['dv','ls'],bellman:['dv'],rip:['rip'],loop:['rip','dv'],timers:['rip'],dijkstra:['ls'],areas:['ospf','lsa'],ospf:['ospf'],lsa:['lsa','ospf'],bgp:['bgp'],
+ tcp:['tcp','handshake'],'tcp-fields':['tcp'],udp:['udp'],application:['http','osi'],dhcp:['dhcp'],dns:['dns'],'dns-message':['records'],http:['http'],'http-state':['cache'],physical:['line','delay'],datalink:['arq','packets'],session:['session'],presentation:['presentation']
+};
+function addLessonVideos(body,id){
+ const matches=videosByLesson[id];
+ if(!matches?.length)return;
+ const section=make('section',undefined,'lesson-videos');
+ section.append(make('h3','Watch on YouTube','label'));
+ for(const key of matches){
+  const [video,title,description,start]=lessonVideos[key];
+  const link=make('a',undefined,'video-card');
+  link.href='https://www.youtube.com/watch?v='+video+(start?'&t='+start+'s':'');
+  link.target='_blank';link.rel='noopener noreferrer';
+  const icon=make('span','▶','video-icon');icon.setAttribute('aria-hidden','true');
+  const copy=make('span');copy.append(make('strong',title),make('small',description));
+  const arrow=make('span','↗');arrow.setAttribute('aria-hidden','true');
+  link.append(icon,copy,arrow);section.append(link);
+ }
+ body.append(section);
+}
+
 let lessonTrigger=null;
+function setLessonExpanded(expanded){
+ $('lesson-drawer').classList.toggle('is-expanded',expanded);
+ $('lesson-expand').setAttribute('aria-pressed',String(expanded));
+ $('lesson-expand').textContent=expanded?'Restore':'Expand';
+}
+$('lesson-expand').onclick=()=>setLessonExpanded(!$('lesson-drawer').classList.contains('is-expanded'));
 function openLesson(id,trigger){
  const item=lessons[id];
  if(!item)return;
@@ -174,6 +231,7 @@ function openLesson(id,trigger){
   for(const [term] of keywords)list.append(button(term,()=>showDefinitions(term)));
   body.append(make('div','Definitions & keywords','label'),list);
  }
+ addLessonVideos(body,id);
  body.append(make('div','Questions to check','label'));
  for(const [q,a] of item.questions){
   const d=make('details');d.append(make('summary',q),make('p',a));body.append(d);
@@ -186,6 +244,7 @@ function openLesson(id,trigger){
 }
 function closeLesson(){
  $('lesson-drawer').hidden=true;
+ setLessonExpanded(false);
  if(lessonTrigger?.isConnected)lessonTrigger.focus({preventScroll:true});
  lessonTrigger=null;
 }
@@ -290,6 +349,10 @@ function render(){
  const selected=modes[mode],st=currentStep(),steps=branchControls();
  renderStageTrack(steps);
  $('router-map').textContent=mode==='journey'?'Router map':'Stage map';
+ $('down').disabled=mode==='encap'&&layer===0;
+ $('up').disabled=mode==='encap'&&layer===6;
+ $('down').setAttribute('aria-pressed',String(mode==='encap'&&branch===0));
+ $('up').setAttribute('aria-pressed',String(mode==='encap'&&branch===1));
  $('section').textContent=mode==='encap'?'OSI / L'+(layer+1):'OSI / L'+(layer+1)+' / '+layerNames[layer].toUpperCase();
  $('title').textContent=selected.name;
  $('intro').textContent=selected.subtitle;
@@ -348,8 +411,12 @@ $('router-map').onclick=()=>{
  $('map-dialog').showModal();
 };
 for(const [id,name] of tabs)$('lab-list').append(button(name,()=>{$('lab-dialog').close();choose(id);}));
-$('down').onclick=()=>choose('encap',0,6-layer);
-$('up').onclick=()=>choose('encap',1,layer);
+function travelStack(receiver){
+ const nextLayer=mode==='encap'?Math.max(0,Math.min(6,layer+(receiver?1:-1))):(receiver?0:6);
+ choose('encap',receiver?1:0,receiver?nextLayer:6-nextLayer);
+}
+$('down').onclick=()=>travelStack(false);
+$('up').onclick=()=>travelStack(true);
 $('reset').onclick=()=>place(0,true);
 $('scrub').oninput=e=>place(Number(e.target.value),true);
 $('scrub').onkeydown=e=>{
@@ -406,8 +473,8 @@ function label(text,x,y,color='#aeaeae',size=11,align='center',maxWidth){
 function tile(x,y,width,height,title,detail,active){
  box(x-width/2,y-height/2,width,height,5,active?'#303030':'#191919',active?'#909090':'#525252');
  const compact=width<120;
- label(title,x,y-8,active?'#f4f4f4':'#dedede',compact?11:13,'center',width-18);
- label(detail,x,y+9,'#b5b5b5',compact?9:11,'center',width-18);
+ label(title,x,y-8,active?'#f4f4f4':'#dedede',compact?12:15,'center',width-18);
+ label(detail,x,y+9,'#b5b5b5',compact?10:12,'center',width-18);
 }
 function token(x,y,text,color='#5b5b5b',primary=false){
  ctx.font='12px monospace';const width=ctx.measureText(text).width+21;
@@ -443,12 +510,12 @@ function draw(){
  ctx.strokeStyle='#181818';ctx.lineWidth=1;
  for(let x=(144-cam*.51%144)%144;x<w;x+=144){ctx.beginPath();ctx.moveTo(x,0);ctx.lineTo(x,h);ctx.stroke();}
  if(mode==='encap'){
-  const x=w*.46,ytop=128,gap=Math.min(44,Math.max(22,(h-210)/7)),width=Math.min(w-34,270);
+  const x=w*.43,ytop=Math.min(175,h*.32),gap=Math.min(48,Math.max(22,(h-ytop-62)/7)),width=Math.min(w-34,340);
   [...layerNames].reverse().forEach((name,n)=>{
    const y=ytop+n*gap;
    box(x-width/2,y,width,gap-4,3,n===6-layer?'#222222':'#0f0f0f','#343434');
-   label('L'+(7-n)+' '+name,x,y+(gap-4)/2,'#d6d6d6',11,'center',width-16);
-   hotspot('osi-'+n,'Explain '+name,n===4?'forward':n===5?'ingress':branch?'destination':'sender',x,y+(gap-4)/2,width,gap-4);
+   label('L'+(7-n)+' '+name,x,y+(gap-4)/2,'#ededed',14,'center',width-20);
+   hotspot('osi-'+n,'Explain '+name,['application','presentation','session','tcp','forward','datalink','physical'][n],x,y+(gap-4)/2,width,gap-4);
   });
   const n=6-layer+(branch?-frac:frac)*.74;
   token(x+width/2-30,ytop+n*gap+gap/2,'PDU','#5b5b5b',true);return;
@@ -488,7 +555,7 @@ function draw(){
  st.paths.forEach(path=>line(pt(path.from),pt(path.to),path.color,2));
  opt.visible.forEach(n=>{
   const [x,y]=pt(n),active=st.paths.some(path=>path.from===n||path.to===n);
-  const width=Math.min(136,Math.max(60,w*.195));
+  const width=Math.min(156,Math.max(66,w*.21));
   const detail=opt.aliases[n]??nodes[n][3];
   const name=opt.names?.[n]??nodes[n][2];
   tile(x,y,width,44,name,detail,active);
