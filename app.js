@@ -142,37 +142,15 @@ defContext.onclick=()=>{
 };
 
 const lessonVideos={
- packets:['rYodcvhh7b8','How Packets Travel Through a Network','Practical Networking · Follow encapsulation, ARP, and Ethernet frames across routers.'],
- arp:['QPi5Nvxaosw','Address Resolution Protocol in less than 5 minutes','Practical Networking · See the broadcast request and the unicast reply.'],
- prefix:['9x_u839WDcs','Think Like a Router: Longest Prefix Match','Walk through competing prefixes and choose the most specific match.'],
- subnet:['BWZ-MHIhqjM','What Is Subnetting?','Practical Networking · Build intuition for networks, prefixes, and boundaries.'],
- fragment:['JDlJyjdAiLs','IP Datagrams, Fragmentation and Addressing','Follow the IP header, outgoing MTU, fragmentation, and reassembly.'],
- switching:['-HlJ4psu5aU','Switching Techniques in Computer Networks','Neso Academy · Compare circuits, datagrams, and virtual circuits.'],
- delay:['UUhHGzFBsmU','End-to-End Delay','Sumit Pundir · Separate transmission, propagation, processing, and queueing delay.'],
- dv:['z-3cfz1g9Wc','Distance Vector Routing and Bellman–Ford','Work through distance estimates and updates between neighbors.'],
- rip:['Z5LWEbIh-RY','Routing Information Protocol','Neso Academy · Review RIP as a distance-vector protocol.'],
- ls:['Q31hToRHPvc','Link State Routing and Dijkstra’s Algorithm','Follow the shortest-path calculation in a routing example.'],
- ospf:['_ThYOX1wX_4','OSPF Framework and Packet Types','Practical Networking · Compare the LSDB, LSAs and the five OSPF packet types.'],
- lsa:['Wf755546JhA','The Types of OSPF LSAs','Practical Networking · Follow how different advertisements describe links and areas.'],
- bgp:['MN9SbpW-lWk','Border Gateway Protocol Explained','Sikandar Shaik · Learn how BGP works between autonomous systems.'],
- udp:['VjBDgcNno-Q','Connectionless Transport: UDP','Jim Kurose · Study UDP’s structure, demultiplexing, and checksum.'],
- tcp:['JFch3ctY6nE','TCP: 12 Ideas Behind the Protocol','A technical walkthrough of TCP’s core mechanisms, including flow control.'],
- handshake:['eKpOaRzUhMI','TCP Three-Way Handshake in Wireshark','Watch a real SYN, SYN-ACK, and ACK exchange in a packet capture.'],
- dhcp:['e6-TaH5bkjo','DHCP Explained','PowerCert Animated Videos · Visualize how a host gets an IP configuration.'],
- dns:['mpQZVYPuDGU','How a DNS Server Works','PowerCert Animated Videos · Trace recursive resolution and the DNS hierarchy.'],
- records:['c8qZeKgkKok','DNS Record Types','Compare resource records and what each one represents.'],
- http:['S9GEPaQ1lFs','The Web and HTTP, Part 1','Jim Kurose · Study requests, responses, and connection reuse.'],
- cache:['IYHyw7j13yE','HTTP Cookies, Caching and Conditional GET','See how browsers maintain session state and revalidate cached responses.'],
- line:['gwe3S_AFLEo','Digital-to-Digital Encoding','Compare NRZ, NRZI, Manchester, and bipolar AMI.'],
- arq:['QD3oCelHJ20','Go-Back-N ARQ','Neso Academy · See why a sliding window changes retransmission behavior.'],
- osi:['Tt8BTkxz_Vc','The OSI Model','Compare what each OSI layer does and how responsibilities fit together.'],
- session:['Tt8BTkxz_Vc','OSI Model: Session Layer','Start at 6:05 for the discussion of application dialogues.',365],
- presentation:['Tt8BTkxz_Vc','OSI Model: Presentation Layer','Start at 7:25 for the discussion of data representation.',445]
+ stop:['YdkksvhkQGQ','Stop-and-Wait ARQ','Neso Academy · ACK loss, timeouts, and retransmission.'],
+ gbn:['QD3oCelHJ20','Go-Back-N ARQ','Neso Academy · Sliding windows and which frames are retransmitted.'],
+ vlan:['GrhHMai2d2Y','How VLANs Work','Network Direction · Ethernet switching and broadcast domains.'],
+ fundamentals:['fQbBPa0ADvs','Computer Networking Fundamentals','freeCodeCamp · A course-level overview of networking.']
 };
 const videosByLesson={
- sender:['packets'],ingress:['packets'],validate:['fragment'],forward:['prefix','packets'],classful:['subnet'],cidr:['subnet','prefix'],ttl:['fragment'],arp:['arp','packets'],'arp-cache':['arp'],'arp-legacy':['arp'],mtu:['fragment'],egress:['packets','delay'],destination:['packets'],
- switching:['switching'],delay:['delay'],scope:['packets','arp'],routing:['dv','ls'],bellman:['dv'],rip:['rip'],loop:['rip','dv'],timers:['rip'],dijkstra:['ls'],areas:['ospf','lsa'],ospf:['ospf'],lsa:['lsa','ospf'],bgp:['bgp'],
- tcp:['tcp','handshake'],'tcp-fields':['tcp'],udp:['udp'],application:['http','osi'],dhcp:['dhcp'],dns:['dns'],'dns-message':['records'],http:['http'],'http-state':['cache'],physical:['line','delay'],datalink:['arq','packets'],session:['session'],presentation:['presentation']
+ datalink:['stop','gbn','vlan'],
+ sender:['fundamentals'],
+ application:['fundamentals']
 };
 function addLessonVideos(body,id){
  const matches=videosByLesson[id];
@@ -354,7 +332,7 @@ function render(){
  $('down').setAttribute('aria-pressed',String(mode==='encap'&&branch===0));
  $('up').setAttribute('aria-pressed',String(mode==='encap'&&branch===1));
  $('section').textContent=mode==='encap'?'OSI / L'+(layer+1):'OSI / L'+(layer+1)+' / '+layerNames[layer].toUpperCase();
- $('title').textContent=selected.name;
+ if($('title').textContent!==selected.name)$('title').textContent=selected.name;
  $('intro').textContent=selected.subtitle;
  $('step-title').textContent=st.title;
  $('counter').textContent=String(index+1).padStart(2,'0')+' / '+String(steps.length).padStart(2,'0');
@@ -451,7 +429,7 @@ canvas.onpointermove=e=>{
  if(!drag.axis&&Math.hypot(dx,dy)>4)drag.axis=Math.abs(dx)>Math.abs(dy)?'x':'y';
  if(!drag.axis)return;
  const delta=drag.axis==='y'?dy:dx;
- place(drag.p+delta/Math.max(78,canvas.clientWidth*.20),true);
+ place(drag.p+delta/Math.max(105,canvas.clientWidth*.26));
 };
 canvas.onlostpointercapture=()=>{drag=null;};
 canvas.onpointerup=()=>{
@@ -460,6 +438,12 @@ canvas.onpointerup=()=>{
  if(inspect)inspectStage($('inspect-more'));
 };
 canvas.onpointercancel=()=>{drag=null;};
+canvas.addEventListener('wheel',event=>{
+ if(event.ctrlKey)return;
+ event.preventDefault();
+ const unit=event.deltaMode===1?16:event.deltaMode===2?canvas.clientHeight:1;
+ place(position+event.deltaY*unit/span,true);
+},{passive:false});
 function line(a,b,color,width=1){
  ctx.beginPath();ctx.moveTo(...a);ctx.lineTo(...b);ctx.strokeStyle=color;ctx.lineWidth=width;ctx.stroke();
 }
@@ -473,8 +457,8 @@ function label(text,x,y,color='#aeaeae',size=11,align='center',maxWidth){
 function tile(x,y,width,height,title,detail,active){
  box(x-width/2,y-height/2,width,height,5,active?'#303030':'#191919',active?'#909090':'#525252');
  const compact=width<120;
- label(title,x,y-8,active?'#f4f4f4':'#dedede',compact?12:15,'center',width-18);
- label(detail,x,y+9,'#b5b5b5',compact?10:12,'center',width-18);
+ label(title,x,y-Math.min(8,height*.22),active?'#f4f4f4':'#dedede',compact?12:15,'center',width-18);
+ label(detail,x,y+Math.min(9,height*.24),'#b5b5b5',compact?10:12,'center',width-18);
 }
 function token(x,y,text,color='#5b5b5b',primary=false){
  ctx.font='600 13px Arial, sans-serif';const width=ctx.measureText(text).width+21;
@@ -523,15 +507,10 @@ function draw(){
  packetLocation=null;
  for(const el of hitButtons.values())el.hidden=true;
  const st=currentStep(),fraction=position-index;
- const overlay=document.querySelector('.overlay').getBoundingClientRect();
- const surface=canvas.getBoundingClientRect();
- const roof=Math.max(115,overlay.bottom-surface.top+14);
- const stageBottom=h-(w<620?64:84);
- const usability=Math.max(72,stageBottom-roof);
- const railY=Math.min(stageBottom-30,roof+usability*.55);
+ const roof=Math.min(mode in labLayers?285:235,h*.45);
+ const stageBottom=h-(w<620?63:85);
  const routed=mode==='journey'&&branch<5;
  const primary=st.paths[0];
- const zoom=w<620?.82:1;
  const pin=(x,y,active)=>{
   ctx.beginPath();ctx.arc(x,y,active?5:3,0,2*Math.PI);
   ctx.fillStyle=active?'#dedede':'#777';ctx.fill();
@@ -571,75 +550,68 @@ function draw(){
   return;
  }
  const opt=current();
- const members=routed?Object.keys(rnodes):[...opt.visible].sort((a,b)=>nodes[a][0]-nodes[b][0]);
- const cardWidth=routed?Math.round(174*zoom):Math.min(156,Math.max(109,(w-40)/members.length-12));
- const gap=cardWidth+25;
- const worldWidth=Math.max(0,(members.length-1)*gap);
- const virtual=!routed&&worldWidth+cardWidth+24>w;
- const positionOf=n=>routed?(n==='ICMP'?1510:rnodes[n][0])*zoom:members.indexOf(n)*gap;
  const chain=['A','I','V','F','H','N','M','O','R2','B'];
- const branchLine=railY+Math.min(86,Math.max(57,usability*.29));
- const mainPoint=n=>[positionOf(n),routed&&!chain.includes(n)?branchLine:railY];
- const route=(from,to,offsetY=0)=>{
-  const [ax,ay]=mainPoint(from),[bx,by]=mainPoint(to);
-  const a=[ax,ay+offsetY],b=[bx,by+offsetY];
-  if(ay===by)return [a,b];
-  // Run horizontal branches below the main cable; connectors stay between card columns.
-  return ay<by?[a,[ax,b[1]],b]:[a,[bx,a[1]],b];
- };
- const motion=st.paths.map((p,i)=>{
-  const points=route(p.from,p.to,i*29);
-  const progress=Math.max(0,(fraction-p.delay)/(1-p.delay));
-  return {path:p,points,point:pointAlong(points,progress)};
- });
- const focus=motion[0]?.point[0]??positionOf(members[0]);
- const cameraAnchor=w*(w<620?.46:.47)+Math.sin(position*.9)*Math.min(72,w*.11);
- const camera=routed||virtual?cameraAnchor-focus:(w-worldWidth)/2;
- const screen=([x,y])=>[x+camera,y];
- grid(camera*.27);
- if(routed){
-  const left=screen(mainPoint('I'))[0]-100*zoom;
-  const right=screen(mainPoint('O'))[0]+100*zoom;
-  const top=railY-118;
-  box(left,top,right-left,Math.max(130,branchLine-top+15),14,'#141414','#303030');
-  label('R1  /  NETWORK PLANE',Math.max(16,left+16),top+14,'#aaa',11,'left',165);
-  for(let i=1;i<chain.length;i++)drawPath(route(chain[i-1],chain[i]).map(screen),'#585858',2);
-  for(const [a,b] of [['V','Drop'],['M','Frag'],['Frag','O'],['M','ICMP']])drawPath(route(a,b).map(screen),'#454545',1.5);
- }else{
-  for(const [a,b] of opt.links)drawPath(route(a,b).map(screen),'#575757',2);
+ const branches=[['V','Drop'],['M','Frag'],['Frag','O'],['M','ICMP']];
+ const members=routed?[...chain,'Drop','Frag','ICMP']:[...opt.visible].sort((a,b)=>nodes[a][0]-nodes[b][0]);
+ const columns=Math.min(members.length,w>=700?5:w>=350?4:3);
+ const rows=Math.ceil(members.length/columns);
+ const gutter=Math.min(35,w*.075);
+ const slot=(w-2*gutter)/columns;
+ const pitch=Math.min(118,Math.max(38,(stageBottom-roof)/rows));
+ const height=Math.max(24,Math.min(49,pitch-23));
+ const width=Math.min(166,slot-10);
+ const rowGap=Math.min(20,Math.max(13,pitch-height-9));
+ const startY=roof+Math.max(height+rowGap,((stageBottom-roof)-(rows-1)*pitch)/2);
+ const points=new Map();
+ for(const [i,n] of members.entries()){
+  const row=Math.floor(i/columns),col=i%columns;
+  const visualCol=row%2===0?col:columns-1-col;
+  points.set(n,{row,col:visualCol,x:gutter+(visualCol+.5)*slot,y:startY+row*pitch});
  }
- for(const {points} of motion)silverRail(points.map(screen));
- for(const n of members){
-  const [x,y]=screen(mainPoint(n));
-  if(x < -cardWidth || x > w+cardWidth)continue;
+ const route=(from,to)=>{
+  const source=points.get(from),target=points.get(to);
+  const a=[source.x,source.y],b=[target.x,target.y];
+  if(source.row===target.row)return [a,b];
+  const useLeft=source.col+target.col<columns-1;
+  const edge=useLeft?18:w-18;
+  return [a,[edge,a[1]],[edge,b[1]],b];
+ };
+ grid(0);
+ const links=routed?[...chain.slice(1).map((n,i)=>[chain[i],n]),...branches]:opt.links;
+ for(const [from,to] of links)drawPath(route(from,to),'#525252',1.5);
+ const motion=st.paths.map(path=>{
+  const track=route(path.from,path.to);
+  const progress=Math.max(0,(fraction-path.delay)/(1-path.delay));
+  return {track,point:pointAlong(track,progress)};
+ });
+ for(const {track} of motion)silverRail(track);
+ const tableDetails={F:'Routing table · DA → NA',N:'ARP table · NA → MAC',M:'MTU table · 1280 B'};
+ for(const [n,{x,y}] of points){
   const active=st.paths.some(path=>path.from===n||path.to===n);
-  const secondary=routed&&!chain.includes(n);
-  const cardY=y+(secondary?52:-61);
-  line([x,y],[x,cardY+(secondary?-24:24)],active?'#aaa':'#626262',1);
+  const cardY=y-height/2-rowGap;
+  line([x,y],[x,y-rowGap],active?'#aaa':'#626262',1);
   pin(x,y,active);
   const name=routed?rnodes[n][2]:(opt.names?.[n]??nodes[n][2]);
-  const detail=routed?rnodes[n][3]:(opt.aliases[n]??nodes[n][3]);
-  card('node-'+n,name,detail,routed?nodeLessons[n]:activeLesson(),x,cardY,cardWidth,48,active);
- }
- if(routed){
-  for(const [n,name,detail,id] of [['F','Routing table','DA → NA','forward'],['N','ARP table','NA → MAC','arp-cache'],['M','MTU table','eth1 → 1280 B','mtu']]){
-   const [x,y]=screen(mainPoint(n));
-   if(x < -80 || x > w+80)continue;
-   const tableY=y-113;
-   line([x,y-85],[x,tableY+18],'#666');
-   tile(x,tableY,126,36,name,detail,false);
-   hotspot('table-'+n,name,id,x,tableY,126,36);
-  }
+  const detail=routed?(tableDetails[n]??rnodes[n][3]):(opt.aliases[n]??nodes[n][3]);
+  const lesson=routed?(n==='N'?'arp-cache':nodeLessons[n]):activeLesson();
+  card('node-'+n,name,detail,lesson,x,cardY,width,height,active);
  }
  if(!primary){
-  const x=w*.5;
-  silverRail([[x-55,railY],[x+55,railY]]);
-  token(x,railY,'PDU','#bcbcbc',true);
+  const {x,y}=points.values().next().value;
+  silverRail([[Math.max(gutter,x-32),y],[Math.min(w-gutter,x+32),y]]);
+  token(x,y,'PDU','#bcbcbc',true);
  }
- // Draw the primary packet last when two protocol messages share a starting point.
  for(let i=motion.length-1;i>=0;i--){
-  const {path,point}=motion[i];
-  token(...screen(point),path.label,'#bcbcbc',i===0);
+  const {point}=motion[i];
+  const [x,y]=point;
+  ctx.save();
+  ctx.shadowColor='#ddd';ctx.shadowBlur=10;
+  ctx.beginPath();ctx.arc(x,y,8,0,Math.PI*2);
+  ctx.fillStyle=i===0?'#f2f2f2':'#b7b7b7';ctx.fill();
+  ctx.restore();
+  ctx.beginPath();ctx.arc(x,y,3,0,Math.PI*2);
+  ctx.fillStyle='#393939';ctx.fill();
+  if(i===0)packetLocation=point;
  }
 }
 new ResizeObserver(draw).observe(canvas);
