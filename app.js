@@ -468,7 +468,7 @@ function box(x,y,w,h,r,fill,stroke){
  if(stroke){ctx.strokeStyle=stroke;ctx.lineWidth=1;ctx.stroke();}
 }
 function label(text,x,y,color='#aeaeae',size=11,align='center',maxWidth){
- ctx.textAlign=align;ctx.textBaseline='middle';ctx.font=size+'px system-ui, sans-serif';ctx.fillStyle=color;if(maxWidth!==undefined)ctx.fillText(text,x,y,maxWidth);else ctx.fillText(text,x,y);
+ ctx.textAlign=align;ctx.textBaseline='middle';ctx.font=size+'px Arial, sans-serif';ctx.fillStyle=color;if(maxWidth!==undefined)ctx.fillText(text,x,y,maxWidth);else ctx.fillText(text,x,y);
 }
 function tile(x,y,width,height,title,detail,active){
  box(x-width/2,y-height/2,width,height,5,active?'#303030':'#191919',active?'#909090':'#525252');
@@ -477,95 +477,170 @@ function tile(x,y,width,height,title,detail,active){
  label(detail,x,y+9,'#b5b5b5',compact?10:12,'center',width-18);
 }
 function token(x,y,text,color='#5b5b5b',primary=false){
- ctx.font='12px system-ui, sans-serif';const width=ctx.measureText(text).width+21;
+ ctx.font='600 13px Arial, sans-serif';const width=ctx.measureText(text).width+21;
  ctx.shadowBlur=primary?15:0;ctx.shadowColor='#464646';
- box(x-width/2,y-13,width,26,3,'#222222',color);
+ box(x-width/2,y-13,width,26,7,'#272727',color);
  ctx.shadowBlur=0;label(text,x,y,'#f3f3f3',12);
  if(primary){
   packetLocation=[x,y];
-  for(const el of hitButtons.values()){
-   if(el.hidden)continue;
-   const left=parseFloat(el.style.left),top=parseFloat(el.style.top);
-   if(x>=left-8&&x<=left+parseFloat(el.style.width)+8&&y>=top-9&&y<=top+parseFloat(el.style.height)+9)el.hidden=true;
-  }
+
  }
+}
+function drawPath(points,color,width){
+ ctx.beginPath();
+ ctx.moveTo(...points[0]);
+ for(const point of points.slice(1))ctx.lineTo(...point);
+ ctx.strokeStyle=color;
+ ctx.lineWidth=width;
+ ctx.lineCap='round';
+ ctx.lineJoin='round';
+ ctx.stroke();
+}
+function silverRail(points){
+ ctx.save();
+ ctx.shadowBlur=10;ctx.shadowColor='#a9a9a968';
+ drawPath(points,'#747474',5);
+ ctx.shadowBlur=0;
+ drawPath(points,'#cecece',1.6);
+ ctx.restore();
+}
+function pointAlong(points,progress){
+ const segments=points.slice(1).map((b,i)=>{
+  const a=points[i];return {a,b,length:Math.hypot(b[0]-a[0],b[1]-a[1])};
+ });
+ let remaining=progress*segments.reduce((sum,segment)=>sum+segment.length,0);
+ for(const {a,b,length} of segments){
+  if(length&&remaining<=length)return [a[0]+(b[0]-a[0])*remaining/length,a[1]+(b[1]-a[1])*remaining/length];
+  remaining-=length;
+ }
+ return points.at(-1);
 }
 function draw(){
  const w=canvas.clientWidth,h=canvas.clientHeight,dpr=devicePixelRatio||1;
  if(!w||!h)return;
  if(canvas.width!==Math.round(w*dpr)||canvas.height!==Math.round(h*dpr)){canvas.width=Math.round(w*dpr);canvas.height=Math.round(h*dpr);}
  ctx.setTransform(dpr,0,0,dpr,0,0);ctx.clearRect(0,0,w,h);
+ packetLocation=null;
  for(const el of hitButtons.values())el.hidden=true;
- const st=currentStep(),frac=position-index,mid=h*(w<620?.47:.49);
+ const st=currentStep(),fraction=position-index;
+ const overlay=document.querySelector('.overlay').getBoundingClientRect();
+ const surface=canvas.getBoundingClientRect();
+ const roof=Math.max(115,overlay.bottom-surface.top+14);
+ const stageBottom=h-(w<620?64:84);
+ const usability=Math.max(72,stageBottom-roof);
+ const railY=Math.min(stageBottom-30,roof+usability*.55);
  const routed=mode==='journey'&&branch<5;
- const p=st.paths[0];
- const zoom=w<620?.79:1;
- const world=routed?rnodes:null;
- let xfocus=0;
- if(world&&p)xfocus=world[p.from][0]+(world[p.to][0]-world[p.from][0])*frac;
- const drift=Math.sin(position*.85)*Math.min(w*.12,120);
- const cam=xfocus*zoom-drift+position*8;
- ctx.fillStyle='#343434';
- for(let x=(36-cam*.26%36)%36;x<w;x+=36)for(let y=26;y<h;y+=36)ctx.fillRect(x,y,1,1);
- ctx.strokeStyle='#181818';ctx.lineWidth=1;
- for(let x=(144-cam*.51%144)%144;x<w;x+=144){ctx.beginPath();ctx.moveTo(x,0);ctx.lineTo(x,h);ctx.stroke();}
+ const primary=st.paths[0];
+ const zoom=w<620?.82:1;
+ const pin=(x,y,active)=>{
+  ctx.beginPath();ctx.arc(x,y,active?5:3,0,2*Math.PI);
+  ctx.fillStyle=active?'#dedede':'#777';ctx.fill();
+ };
+ const grid=offset=>{
+  ctx.fillStyle='#2b2b2b';
+  for(let x=((offset%36)+36)%36;x<w;x+=36)
+   for(let y=22;y<h;y+=36)ctx.fillRect(x,y,1,1);
+ };
+ const card=(key,name,detail,id,x,y,width,height,active)=>{
+  tile(x,y,width,height,name,detail,active);
+  hotspot(key,'Explain '+name,id,x,y,width,height);
+ };
  if(mode==='encap'){
-  const x=w*.43,ytop=Math.min(175,h*.32),gap=Math.min(48,Math.max(22,(h-ytop-62)/7)),width=Math.min(w-34,340);
+  grid(0);
+  const laneX=Math.max(42,w*.22);
+  const gap=Math.min(51,Math.max(21,(stageBottom-roof-14)/7));
+  const startY=roof+gap/2;
+  const width=Math.min(305,w-laneX-70);
+  const x=laneX+45+width/2;
+  const y=n=>startY+n*gap;
+  const layerIndex=6-layer;
+  const next=Math.max(0,Math.min(6,layerIndex+(branch?-1:1)));
+  const lessonIds=['application','presentation','session','tcp','forward','datalink','physical'];
+  drawPath([[laneX,y(0)],[laneX,y(6)]],'#5f5f5f',2);
+  silverRail([[laneX,y(layerIndex)],[laneX,y(next)]]);
   [...layerNames].reverse().forEach((name,n)=>{
-   const y=ytop+n*gap;
-   box(x-width/2,y,width,gap-4,3,n===6-layer?'#222222':'#0f0f0f','#343434');
-   label('L'+(7-n)+' '+name,x,y+(gap-4)/2,'#ededed',14,'center',width-20);
-   hotspot('osi-'+n,'Explain '+name,['application','presentation','session','tcp','forward','datalink','physical'][n],x,y+(gap-4)/2,width,gap-4);
+   const active=n===layerIndex;
+   line([laneX,y(n)],[laneX+45,y(n)],active?'#9b9b9b':'#4f4f4f');
+   pin(laneX,y(n),active);
+   const stepTitle='L'+(7-n)+'  '+name;
+   box(x-width/2,y(n)-Math.min(20,gap*.43),width,Math.min(40,gap*.86),5,active?'#333':'#171717',active?'#999':'#555');
+   label(stepTitle,x,y(n),'#eee',14,'center',width-20);
+   hotspot('osi-'+n,'Explain '+name,lessonIds[n],x,y(n),width,Math.min(40,gap*.86));
   });
-  const n=6-layer+(branch?-frac:frac)*.74;
-  token(x+width/2-30,ytop+n*gap+gap/2,'PDU','#5b5b5b',true);return;
- }
- if(routed){
-  const offset=w*.4+drift-xfocus*zoom,pt=n=>[rnodes[n][0]*zoom+offset,mid+rnodes[n][1]*zoom];
-  const left=pt('I')[0]-110*zoom,right=pt('O')[0]+110*zoom;
-  box(left,mid-109,right-left,218,4,'#131313','#343434');
-  label('R1 / NETWORK PLANE',left+15,mid-91,'#b1b1b1',11,'left');
-  label('INGRESS',left+16,mid+88,'#5b5b5b',10,'left');
-  label('EGRESS',right-16,mid+88,'#5b5b5b',10,'right');
-  const chain=['A','I','V','F','H','N','M','O','R2','B'];
-  chain.slice(1).forEach((n,i)=>line(pt(chain[i]),pt(n),'#343434',2));
-  [['V','Drop'],['M','Frag'],['Frag','O'],['M','ICMP']].forEach(([a,b])=>line(pt(a),pt(b),'#343434'));
-  [['F','Routing table','DA → NA'],['N','ARP table','NA → MAC'],['M','MTU table','eth1 → 1280 B']].forEach(([n,name,detail])=>{
-   const [x,y]=pt(n),dy=n==='M'?54:-57,sy=y+dy;
-   line([x,y],[x,sy],'#464646');
-   tile(x,sy,116,37,name,detail,false);
-   hotspot('table-'+n,name,n==='N'?'arp-cache':nodeLessons[n],x,sy,116,37);
-  });
-  st.paths.forEach(path=>line(pt(path.from),pt(path.to),'#5b5b5b',2.5));
-  for(const [n,value] of Object.entries(rnodes)){
-   const [x,y]=pt(n),active=p&&(n===p.from||n===p.to);
-   if(x<-170||x>w+170)continue;
-   const width=Math.round(169*zoom);
-   tile(x,y,width,46,value[2],value[3],active);
-   hotspot('node-'+n,'Explain '+value[2],nodeLessons[n],x,y,width,46);
-  }
-  st.paths.forEach((path,i)=>{
-   const a=pt(path.from),b=pt(path.to),t=Math.max(0,(frac-path.delay)/(1-path.delay));
-   token(a[0]+(b[0]-a[0])*t,a[1]+(b[1]-a[1])*t-31-i*29,path.label,path.color,i===0);
-  });
+  token(laneX,y(layerIndex)+(y(next)-y(layerIndex))*fraction,'PDU','#bcbcbc',true);
   return;
  }
- const opt=current(),pt=n=>[nodes[n][0]*w,nodes[n][1]*h*.62+86];
- opt.links.forEach(([a,b])=>line(pt(a),pt(b),'#343434',2));
- st.paths.forEach(path=>line(pt(path.from),pt(path.to),path.color,2));
- opt.visible.forEach(n=>{
-  const [x,y]=pt(n),active=st.paths.some(path=>path.from===n||path.to===n);
-  const width=Math.min(156,Math.max(66,w*.21));
-  const detail=opt.aliases[n]??nodes[n][3];
-  const name=opt.names?.[n]??nodes[n][2];
-  tile(x,y,width,44,name,detail,active);
-  hotspot('generic-'+n,'Explain '+name+' in this lab',activeLesson(),x,y,width,44);
+ const opt=current();
+ const members=routed?Object.keys(rnodes):[...opt.visible].sort((a,b)=>nodes[a][0]-nodes[b][0]);
+ const cardWidth=routed?Math.round(174*zoom):Math.min(156,Math.max(109,(w-40)/members.length-12));
+ const gap=cardWidth+25;
+ const worldWidth=Math.max(0,(members.length-1)*gap);
+ const virtual=!routed&&worldWidth+cardWidth+24>w;
+ const positionOf=n=>routed?(n==='ICMP'?1510:rnodes[n][0])*zoom:members.indexOf(n)*gap;
+ const chain=['A','I','V','F','H','N','M','O','R2','B'];
+ const branchLine=railY+Math.min(86,Math.max(57,usability*.29));
+ const mainPoint=n=>[positionOf(n),routed&&!chain.includes(n)?branchLine:railY];
+ const route=(from,to,offsetY=0)=>{
+  const [ax,ay]=mainPoint(from),[bx,by]=mainPoint(to);
+  const a=[ax,ay+offsetY],b=[bx,by+offsetY];
+  if(ay===by)return [a,b];
+  // Run horizontal branches below the main cable; connectors stay between card columns.
+  return ay<by?[a,[ax,b[1]],b]:[a,[bx,a[1]],b];
+ };
+ const motion=st.paths.map((p,i)=>{
+  const points=route(p.from,p.to,i*29);
+  const progress=Math.max(0,(fraction-p.delay)/(1-p.delay));
+  return {path:p,points,point:pointAlong(points,progress)};
  });
- if(!p){token(w*.4,mid+45,'PDU','#5b5b5b',true);return;}
- st.paths.forEach((path,i)=>{
-  const a=pt(path.from),b=pt(path.to),t=Math.max(0,(frac-path.delay)/(1-path.delay));
-  token(a[0]+(b[0]-a[0])*t,a[1]+(b[1]-a[1])*t-28,path.label,path.color,i===0);
- });
+ const focus=motion[0]?.point[0]??positionOf(members[0]);
+ const cameraAnchor=w*(w<620?.46:.47)+Math.sin(position*.9)*Math.min(72,w*.11);
+ const camera=routed||virtual?cameraAnchor-focus:(w-worldWidth)/2;
+ const screen=([x,y])=>[x+camera,y];
+ grid(camera*.27);
+ if(routed){
+  const left=screen(mainPoint('I'))[0]-100*zoom;
+  const right=screen(mainPoint('O'))[0]+100*zoom;
+  const top=railY-118;
+  box(left,top,right-left,Math.max(130,branchLine-top+15),14,'#141414','#303030');
+  label('R1  /  NETWORK PLANE',Math.max(16,left+16),top+14,'#aaa',11,'left',165);
+  for(let i=1;i<chain.length;i++)drawPath(route(chain[i-1],chain[i]).map(screen),'#585858',2);
+  for(const [a,b] of [['V','Drop'],['M','Frag'],['Frag','O'],['M','ICMP']])drawPath(route(a,b).map(screen),'#454545',1.5);
+ }else{
+  for(const [a,b] of opt.links)drawPath(route(a,b).map(screen),'#575757',2);
+ }
+ for(const {points} of motion)silverRail(points.map(screen));
+ for(const n of members){
+  const [x,y]=screen(mainPoint(n));
+  if(x < -cardWidth || x > w+cardWidth)continue;
+  const active=st.paths.some(path=>path.from===n||path.to===n);
+  const secondary=routed&&!chain.includes(n);
+  const cardY=y+(secondary?52:-61);
+  line([x,y],[x,cardY+(secondary?-24:24)],active?'#aaa':'#626262',1);
+  pin(x,y,active);
+  const name=routed?rnodes[n][2]:(opt.names?.[n]??nodes[n][2]);
+  const detail=routed?rnodes[n][3]:(opt.aliases[n]??nodes[n][3]);
+  card('node-'+n,name,detail,routed?nodeLessons[n]:activeLesson(),x,cardY,cardWidth,48,active);
+ }
+ if(routed){
+  for(const [n,name,detail,id] of [['F','Routing table','DA → NA','forward'],['N','ARP table','NA → MAC','arp-cache'],['M','MTU table','eth1 → 1280 B','mtu']]){
+   const [x,y]=screen(mainPoint(n));
+   if(x < -80 || x > w+80)continue;
+   const tableY=y-113;
+   line([x,y-85],[x,tableY+18],'#666');
+   tile(x,tableY,126,36,name,detail,false);
+   hotspot('table-'+n,name,id,x,tableY,126,36);
+  }
+ }
+ if(!primary){
+  const x=w*.5;
+  silverRail([[x-55,railY],[x+55,railY]]);
+  token(x,railY,'PDU','#bcbcbc',true);
+ }
+ // Draw the primary packet last when two protocol messages share a starting point.
+ for(let i=motion.length-1;i>=0;i--){
+  const {path,point}=motion[i];
+  token(...screen(point),path.label,'#bcbcbc',i===0);
+ }
 }
 new ResizeObserver(draw).observe(canvas);
 choose('journey');
