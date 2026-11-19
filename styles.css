@@ -184,3 +184,20 @@ aside.inspector{width:310px;max-height:42%;padding:15px;border-radius:10px}
  .inspector p,.field span,.field strong,.stack span{font-size:12px}
  .label,.stage-heading small{font-size:11px}
 }
+
+/* Dock the inspector beside the diagram and keep controls outside the packet lane. */
+:root{--reading-font:Arial,"Helvetica Neue",sans-serif}
+body{font-family:var(--reading-font);font-size:16px}
+.overlay h1,.drawer-head h2,.brand{font-family:system-ui,-apple-system,sans-serif}
+.label{font-size:12px;letter-spacing:.075em}
+.overlay>.intro{font-size:15px;line-height:1.55}
+.stage canvas{background:radial-gradient(ellipse at 48% 55%,#1b1b1b 0%,#111 59%,#090909 100%)}
+@media(min-width:1051px){
+ .layout{grid-template-columns:162px minmax(0,1fr) 280px}
+ aside.inspector{position:relative;inset:auto;grid-column:3;grid-row:1;width:auto;max-height:100%;height:100%;padding:22px 17px;border:0;border-left:1px solid #393939;border-radius:0;background:#141414!important}
+ .inspector h2{font-size:19px;margin:9px 0}
+ .inspector p{font-size:14px}
+ .cards{right:20px}
+ .overlay{left:22px;right:22px}
+}
+@media(max-height:700px){.overlay>.intro{margin:4px 0 6px}.overlay>.stage-heading{margin-top:5px}.cards{display:none}}
