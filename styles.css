@@ -117,3 +117,50 @@ button[aria-pressed=true],.layer[aria-pressed=true]{background:#2c2c2c;color:#f5
 .stage-context .packet-layers{display:flex;gap:4px;flex-wrap:wrap;margin-top:8px}
 .stage-context .packet-layers span{background:#282828;border:1px solid #525252;padding:2px 5px;border-radius:4px;font-size:11px}
 @media(max-height:640px){#stage-track{margin-top:5px}#stage-track button{min-height:32px}}
+
+/* Reading surfaces and simulator hierarchy */
+:root{--ink:#f2f2f0;--muted:#bcbcb8;--line:#3b3b38}
+body{font-family:system-ui,-apple-system,"Segoe UI",sans-serif;font-size:16px;line-height:1.58}
+header{min-height:70px;padding-inline:24px;background:#111}
+.brand{font-size:22px;font-weight:750;letter-spacing:-.055em}
+button,select{font-size:14px;border-radius:7px;padding:7px 11px}
+.layout{grid-template-columns:176px minmax(0,1fr)}
+.layout>aside:first-child{padding:24px 12px;background:#121212}
+.layers .layer{font-size:14px;padding:9px 8px;gap:7px}
+.layer span,.label{font-size:11px;letter-spacing:.07em}
+.directions button{text-align:left;font-weight:650}
+.overlay{top:20px;left:28px;right:28px}
+.overlay h1{font-size:clamp(30px,4.5vw,54px);line-height:1.04;letter-spacing:-.065em}
+.overlay>.intro{font-size:15px;line-height:1.45;margin:8px 0 10px;color:#c4c4c0}
+.overlay .branches{gap:7px}
+.overlay>.stage-heading{margin-top:12px}
+.stage-heading h2{font-size:17px;color:#e2e2df;line-height:1.28}
+.stage canvas{background:radial-gradient(ellipse at 43% 49%,#191919 0%,#101010 51%,#090909 100%)}
+#stage-track{margin-top:8px}
+#stage-track button{font-size:13px;min-height:48px;padding:6px 9px}
+aside.inspector{width:310px;max-height:42%;padding:15px;border-radius:10px}
+.inspector h2{font-size:17px;line-height:1.25}
+.inspector p{font-size:13px;line-height:1.45}
+.stack span,.field span,.field strong{font-size:12px}
+.controls{border-radius:9px}
+.controls small,.card p{font-size:12px}
+.card h3{font-size:13px}
+.cards{right:345px}
+#lesson-drawer{width:min(495px,96vw);padding:24px;background:#151515}
+#lesson-drawer.is-expanded{width:min(850px,100%);padding-inline:clamp(18px,4vw,54px);box-shadow:-24px 0 90px #000d}
+.drawer-head{gap:12px;align-items:start}
+.drawer-head h2{font-size:clamp(25px,3vw,36px);line-height:1.12}
+.lesson-actions{display:flex;gap:6px;align-items:center;flex-wrap:wrap;justify-content:end}
+.drawer-body{font-size:16px;line-height:1.63;color:#e0e0dc}
+.drawer-body>.label{margin-top:19px}
+.drawer-body details,.lesson-flow li,.lesson-example{padding:10px 13px}
+.lesson-ref,.keyword-list button{font-size:12px}
+.video-card{display:grid;grid-template-columns:36px 1fr auto;gap:11px;align-items:center;margin:7px 0 12px;padding:12px 14px;border:1px solid #4b4b47;border-radius:9px;background:#202020;color:#f0f0ee;text-decoration:none}
+.video-card:hover{border-color:#aaa;background:#292929}
+.video-card:focus-visible{outline:2px solid #ddd;outline-offset:3px}
+.video-icon{display:grid;place-items:center;height:32px;border-radius:6px;background:#393939;color:#fff;font-size:14px}
+.video-card small{display:block;font-size:12px;margin-top:2px;color:#c2c2be}
+@media(max-width:900px){.layout{grid-template-columns:144px minmax(0,1fr)}.layer{font-size:13px}aside.inspector{width:260px}.cards{right:285px}}
+@media(max-width:760px){header{padding:8px 10px;min-height:56px}.brand{font-size:16px}.layout{grid-template-columns:1fr}.layout>aside:first-child{padding:5px 8px}.layers .layer{font-size:12px;padding:5px 7px}.directions button{font-size:12px;padding:4px 8px}.overlay{left:12px;right:12px;top:10px}.overlay h1{font-size:29px}.overlay>.intro{font-size:13px;margin:5px 0 7px}.overlay .branches button{font-size:11px}.stage-heading h2{font-size:14px}#stage-track button{font-size:12px;min-height:40px}.controls button{font-size:11px}aside.inspector{width:min(290px,79vw);max-height:32%;padding:9px}.inspector h2{font-size:15px}.inspector p{font-size:12px}#lesson-drawer,#lesson-drawer.is-expanded{padding:15px}.drawer-body{font-size:15px}}
+.lesson-videos{margin:20px 0}
+.lesson-videos h3{margin-bottom:8px}
